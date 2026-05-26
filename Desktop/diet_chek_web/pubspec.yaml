@@ -1,0 +1,30 @@
+name: diet_chek
+description: Персональный диетический аудитор чеков.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  provider: ^6.1.1
+  hive_flutter: ^1.1.0
+  shared_preferences: ^2.2.2
+  #google_mlkit_text_recognition: ^0.11.0
+  #camera: ^0.10.5+9
+  image_picker: ^1.0.7
+  path_provider: ^2.1.2
+  path: ^1.8.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/database/food_database.json

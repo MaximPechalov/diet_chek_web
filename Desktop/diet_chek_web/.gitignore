@@ -1,0 +1,108 @@
+# === Dart / Flutter ===
+
+# Файлы пакетов
+.packages
+.pub/
+pubspec.lock
+
+# Сборка и кеш
+build/
+.dart_tool/
+*.iml
+*.lock
+
+# Сгенерированные файлы
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
+# Анализ и покрытие
+coverage/
+test/.test_runner.dart
+
+# === IDE ===
+
+# Android Studio / IntelliJ
+.idea/
+*.iws
+*.ipr
+*.iml
+
+# Visual Studio Code
+.vscode/
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/settings.json
+
+# === Операционные системы ===
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# === Файлы окружения ===
+
+# Секреты и конфиденциальные данные
+.env
+.env.*
+*.env
+secrets.yaml
+secrets.json
+google-services.json
+GoogleService-Info.plist
+
+# Логи
+*.log
+logs/
+
+# Временные файлы
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# === Специфичные для проекта ===
+
+# База продуктов, если появится обфусцированная версия
+assets/database/*.encrypted.json
+
+# Пользовательские данные (на всякий случай, если будут локальные дампы)
+*.db
+*.sqlite
+*.sqlite3
+
+# Кеш изображений с камеры (если сохраняем временные фото чеков)
+temp_images/
