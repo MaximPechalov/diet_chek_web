@@ -1,9 +1,12 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/usecases/scan_receipt.dart';
 import '../../services/ocr_service.dart';
 import '../../services/open_food_facts_service.dart';
+import '../../data/models/receipt.dart';
 import 'controller/scanner_controller.dart';
 import 'result_screen.dart';
 
@@ -53,11 +56,21 @@ class _ScannerScreenState extends State<ScannerScreen> {
             bottomNavigationBar: _BottomScanButton(
               controller: controller,
               onPickFromGallery: () => _pickFromGallery(context),
+              onSaveToHistory: _saveToHistory,
             ),
           );
         },
       ),
     );
+  }
+
+  Future<void> _saveToHistory(Receipt receipt) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final List<String> savedReceipts = prefs.getStringList('receipts') ?? [];
+      savedReceipts.insert(0, jsonEncode(receipt.toJson()));
+      await prefs.setStringList('receipts', savedReceipts);
+    } catch (e) {}
   }
 
   Future<void> _pickFromGallery(BuildContext context) async {
@@ -76,15 +89,8 @@ class _ScannerScreenState extends State<ScannerScreen> {
       if (!mounted) return;
 
       if (onlineSuccess && controller.currentReceipt != null) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ChangeNotifierProvider<ScannerController>.value(
-              value: controller,
-              child: const ResultScreen(),
-            ),
-          ),
-        );
+        await _saveToHistory(controller.currentReceipt!);
+        _navigateToResult(context, controller);
       } else if (!onlineSuccess && controller.dataSource != null) {
         _showOfflineDialog(context, controller);
       }
@@ -95,6 +101,31 @@ class _ScannerScreenState extends State<ScannerScreen> {
         );
       }
     }
+  }
+
+  void _navigateToResult(BuildContext context, ScannerController controller) {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            ChangeNotifierProvider<ScannerController>.value(
+          value: controller,
+          child: const ResultScreen(),
+        ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(1.0, 0.0),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeInOut,
+            )),
+            child: child,
+          );
+        },
+      ),
+    );
   }
 
   void _showOfflineDialog(BuildContext context, ScannerController controller) {
@@ -117,19 +148,12 @@ class _ScannerScreenState extends State<ScannerScreen> {
               child: const Text('Нет'),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.pop(dialogContext);
                 controller.useOfflineData();
                 if (controller.currentReceipt != null && context.mounted) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ChangeNotifierProvider<ScannerController>.value(
-                        value: controller,
-                        child: const ResultScreen(),
-                      ),
-                    ),
-                  );
+                  await _saveToHistory(controller.currentReceipt!);
+                  _navigateToResult(context, controller);
                 }
               },
               child: const Text('Да, использовать офлайн'),
@@ -176,30 +200,30 @@ class _CameraPreview extends StatelessWidget {
     return Container(
       color: Colors.black,
       child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.document_scanner,
-              size: 80,
-              color: Colors.white.withOpacity(0.5),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Наведите камеру на чек\nили выберите фото из галереи',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
-                fontSize: 16,
+        child: controller.isProcessing
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(color: Colors.white),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Анализируем чек...',
+                    style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14),
+                  ),
+                ],
+              )
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.document_scanner, size: 80, color: Colors.white.withOpacity(0.5)),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Наведите камеру на чек\nили выберите фото из галереи',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 16),
+                  ),
+                ],
               ),
-            ),
-            if (controller.isProcessing)
-              const Padding(
-                padding: EdgeInsets.only(top: 16),
-                child: CircularProgressIndicator(color: Colors.white),
-              ),
-          ],
-        ),
       ),
     );
   }
@@ -217,16 +241,11 @@ class _ScanInfoPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Активные диеты:',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+          Text('Активные диеты:', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           if (controller.activeDiets.isEmpty)
-            Text(
-              'Диеты не выбраны. Перейдите в настройки.',
-              style: TextStyle(color: Colors.grey[600]),
-            )
+            Text('Диеты не выбраны. Перейдите в настройки.',
+                style: TextStyle(color: Colors.grey[600]))
           else
             Wrap(
               spacing: 8,
@@ -253,10 +272,8 @@ class _ScanInfoPanel extends StatelessWidget {
                   Icon(Icons.error_outline, color: Colors.red[700]),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      controller.errorMessage!,
-                      style: TextStyle(color: Colors.red[700], fontSize: 13),
-                    ),
+                    child: Text(controller.errorMessage!,
+                        style: TextStyle(color: Colors.red[700], fontSize: 13)),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close, size: 16),
@@ -296,10 +313,12 @@ class _ScanInfoPanel extends StatelessWidget {
 class _BottomScanButton extends StatelessWidget {
   final ScannerController controller;
   final VoidCallback onPickFromGallery;
+  final Future<void> Function(Receipt) onSaveToHistory;
 
   const _BottomScanButton({
     required this.controller,
     required this.onPickFromGallery,
+    required this.onSaveToHistory,
   });
 
   @override
@@ -359,13 +378,27 @@ class _BottomScanButton extends StatelessWidget {
     if (!context.mounted) return;
 
     if (onlineSuccess && controller.currentReceipt != null) {
+      await onSaveToHistory(controller.currentReceipt!);
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => ChangeNotifierProvider<ScannerController>.value(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              ChangeNotifierProvider<ScannerController>.value(
             value: controller,
             child: const ResultScreen(),
           ),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(1.0, 0.0),
+                end: Offset.zero,
+              ).animate(CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeInOut,
+              )),
+              child: child,
+            );
+          },
         ),
       );
     } else if (!onlineSuccess && controller.dataSource != null) {
@@ -388,17 +421,31 @@ class _BottomScanButton extends StatelessWidget {
                 child: const Text('Нет'),
               ),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   Navigator.pop(dialogContext);
                   controller.useOfflineData();
                   if (controller.currentReceipt != null && context.mounted) {
+                    await onSaveToHistory(controller.currentReceipt!);
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => ChangeNotifierProvider<ScannerController>.value(
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            ChangeNotifierProvider<ScannerController>.value(
                           value: controller,
                           child: const ResultScreen(),
                         ),
+                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                          return SlideTransition(
+                            position: Tween<Offset>(
+                              begin: const Offset(1.0, 0.0),
+                              end: Offset.zero,
+                            ).animate(CurvedAnimation(
+                              parent: animation,
+                              curve: Curves.easeInOut,
+                            )),
+                            child: child,
+                          );
+                        },
                       ),
                     );
                   }

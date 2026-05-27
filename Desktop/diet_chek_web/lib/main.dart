@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
+import 'features/onboarding/onboarding_screen.dart';
 import 'data/datasources/local_database.dart';
 import 'data/repositories/product_repository.dart';
 import 'domain/usecases/scan_receipt.dart';
@@ -34,6 +36,8 @@ void main() async {
   final OcrService ocrService = OcrService();
   final OpenFoodFactsService openFoodFactsService = OpenFoodFactsService();
 
+  final bool onboardingComplete = await _isOnboardingComplete();
+
   runApp(
     MultiProvider(
       providers: [
@@ -42,7 +46,35 @@ void main() async {
         Provider<OcrService>.value(value: ocrService),
         Provider<OpenFoodFactsService>.value(value: openFoodFactsService),
       ],
-      child: DietChekApp(),
+      child: onboardingComplete
+          ? DietChekApp()
+          : MaterialApp(
+              debugShowCheckedModeBanner: false,
+              home: OnboardingScreen(
+                onComplete: () {
+                  runApp(
+                    MultiProvider(
+                      providers: [
+                        Provider<ProductRepository>.value(value: productRepository),
+                        Provider<ScanReceiptUseCase>.value(value: scanReceiptUseCase),
+                        Provider<OcrService>.value(value: ocrService),
+                        Provider<OpenFoodFactsService>.value(value: openFoodFactsService),
+                      ],
+                      child: DietChekApp(),
+                    ),
+                  );
+                },
+              ),
+            ),
     ),
   );
+}
+
+Future<bool> _isOnboardingComplete() async {
+  try {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('onboarding_complete') ?? false;
+  } catch (e) {
+    return false;
+  }
 }

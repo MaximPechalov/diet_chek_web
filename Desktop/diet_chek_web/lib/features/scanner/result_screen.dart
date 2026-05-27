@@ -31,10 +31,7 @@ class ResultScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          _ReceiptSummary(
-           receipt: receipt,
-           dataSource: controller.dataSource?.name,
-           ),
+          _ReceiptSummary(receipt: receipt, dataSource: controller.dataSource?.name),
           _DietSummaryCards(receipt: receipt),
           Expanded(
             child: _ProductList(receipt: receipt),
@@ -60,6 +57,9 @@ class _ReceiptSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double rate = receipt.matchRate;
+    final Color barColor = rate >= 0.8 ? Colors.green : rate >= 0.5 ? Colors.orange : Colors.red;
+
     return Container(
       padding: const EdgeInsets.all(16),
       color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
@@ -87,6 +87,21 @@ class _ReceiptSummary extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: rate,
+              backgroundColor: Colors.grey[200],
+              valueColor: AlwaysStoppedAnimation<Color>(barColor),
+              minHeight: 8,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Покрытие базы: ${(rate * 100).toStringAsFixed(0)}%',
+            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+          ),
           if (dataSource != null && dataSource != 'online' && dataSource != 'local') ...[
             const SizedBox(height: 12),
             Container(
@@ -105,25 +120,19 @@ class _ReceiptSummary extends StatelessWidget {
               child: Row(
                 children: [
                   Icon(
-                    dataSource == 'offline_timeout'
-                        ? Icons.wifi_off
-                        : Icons.cloud_off,
+                    dataSource == 'offline_timeout' ? Icons.wifi_off : Icons.cloud_off,
                     size: 18,
-                    color: dataSource == 'offline_timeout'
-                        ? Colors.orange[700]
-                        : Colors.red[700],
+                    color: dataSource == 'offline_timeout' ? Colors.orange[700] : Colors.red[700],
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       dataSource == 'offline_timeout'
                           ? 'Сервер не отвечает. Показаны данные из офлайн-базы.'
-                          : 'Нет подключения к интернету. Показаны данные из офлайн-базы.',
+                          : 'Нет подключения к интернету.',
                       style: TextStyle(
                         fontSize: 12,
-                        color: dataSource == 'offline_timeout'
-                            ? Colors.orange[700]
-                            : Colors.red[700],
+                        color: dataSource == 'offline_timeout' ? Colors.orange[700] : Colors.red[700],
                       ),
                     ),
                   ),

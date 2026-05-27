@@ -18,6 +18,8 @@ class DietChekApp extends StatefulWidget {
 
 class DietChekAppState extends State<DietChekApp> {
   ThemeMode _themeMode = ThemeMode.system;
+  double _accentHue = 120;
+  double _backgroundWarmth = 0;
 
   @override
   void initState() {
@@ -29,6 +31,8 @@ class DietChekAppState extends State<DietChekApp> {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final String? themeStr = prefs.getString('theme_mode');
+      _accentHue = prefs.getDouble('accent_hue') ?? 120;
+      _backgroundWarmth = prefs.getDouble('background_warmth') ?? 0;
       setState(() {
         switch (themeStr) {
           case 'light':
@@ -48,8 +52,31 @@ class DietChekAppState extends State<DietChekApp> {
     setState(() => _themeMode = mode);
   }
 
+  void setAccentColorFromHue(double hue) {
+    setState(() => _accentHue = hue);
+  }
+
+  void setBackgroundWarmth(double warmth) {
+    setState(() => _backgroundWarmth = warmth);
+  }
+
+  Color get _accentColor => HSLColor.fromAHSL(1.0, _accentHue, 0.5, 0.5).toColor();
+
+  Color get _backgroundColor {
+    if (_themeMode == ThemeMode.dark) {
+      return const Color(0xFF121212);
+    }
+    return Color.lerp(
+      const Color(0xFFF5F5F5),
+      const Color(0xFFF5F0E8),
+      _backgroundWarmth,
+    )!;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final Color accent = _accentColor;
+
     return MaterialApp(
       title: 'DietChek',
       debugShowCheckedModeBanner: false,
@@ -57,21 +84,24 @@ class DietChekAppState extends State<DietChekApp> {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
+          seedColor: accent,
           brightness: Brightness.light,
         ),
         appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
-        scaffoldBackgroundColor: AppColors.background,
+        scaffoldBackgroundColor: _backgroundColor,
       ),
       darkTheme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
+          seedColor: accent,
           brightness: Brightness.dark,
         ),
         appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
       ),
       home: const MainNavigationScreen(),
+      routes: {
+        '/home': (context) => const MainNavigationScreen(),
+      },
     );
   }
 }

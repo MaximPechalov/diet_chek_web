@@ -138,11 +138,24 @@ class _CompositionScannerScreenState extends State<CompositionScannerScreen> {
     if (mounted) {
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => CompositionResultScreen(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              CompositionResultScreen(
             compositionText: compositionText,
             results: results,
           ),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(1.0, 0.0),
+                end: Offset.zero,
+              ).animate(CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeInOut,
+              )),
+              child: child,
+            );
+          },
         ),
       );
     }
@@ -299,8 +312,8 @@ class _BottomButtons extends StatelessWidget {
             Expanded(
               child: ElevatedButton.icon(
                 onPressed: isProcessing ? null : onTestData,
-                icon: const Icon(Icons.science),
-                label: const Text('Тест', style: TextStyle(fontSize: 14)),
+                icon: const Icon(Icons.document_scanner),
+                label: const Text('Сканировать', style: TextStyle(fontSize: 14)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Theme.of(context).colorScheme.onPrimary,

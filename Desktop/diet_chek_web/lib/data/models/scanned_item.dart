@@ -40,6 +40,50 @@ class ScannedItem {
   bool get isMatched => matchedProduct != null;
   bool get isUnknown => matchedProduct == null;
 
+  Map<String, dynamic> toJson() {
+    return {
+      'rawText': rawText,
+      'normalizedText': normalizedText,
+      'matchedProductKey': matchedProduct?.key,
+      'matchedProductCategory': matchedProduct?.category,
+      'matchedProductSubcategory': matchedProduct?.subcategory,
+      'dietResults': dietResults?.map((key, rule) => MapEntry(key, {
+            'verdict': rule.verdict,
+            'condition': rule.condition,
+            'reason': rule.reason,
+          })),
+    };
+  }
+
+  factory ScannedItem.fromJson(Map<String, dynamic> json) {
+    Map<String, DietRule>? dietResults;
+    if (json['dietResults'] != null) {
+      dietResults = (json['dietResults'] as Map<String, dynamic>).map(
+        (key, value) => MapEntry(key, DietRule(
+          verdict: value['verdict'] as String,
+          condition: value['condition'] as String?,
+          reason: value['reason'] as String?,
+        )),
+      );
+    }
+
+    return ScannedItem(
+      rawText: json['rawText'] as String,
+      normalizedText: json['normalizedText'] as String,
+      matchedProduct: json['matchedProductKey'] != null
+          ? Product(
+              key: json['matchedProductKey'] as String,
+              category: json['matchedProductCategory'] as String? ?? '',
+              subcategory: json['matchedProductSubcategory'] as String? ?? '',
+              baseTokens: [],
+              attributes: {},
+              dietRules: {},
+            )
+          : null,
+      dietResults: dietResults,
+    );
+  }
+
   @override
   String toString() {
     return 'ScannedItem($rawText -> ${matchedProduct?.key ?? "UNKNOWN"})';
