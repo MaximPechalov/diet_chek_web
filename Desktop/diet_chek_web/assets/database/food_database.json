@@ -3895,6 +3895,104 @@
                     "lactose_free": "allowed"
                 }
             }
+        },
+        "напитки": {
+            "вода питьевая": {
+                "category": "напитки",
+                "subcategory": "вода",
+                "base_tokens": ["вода", "вода питьевая", "вода минеральная", "вода без газа", "вода газированная"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": false,
+                    "typical_protein": 0.0,
+                    "typical_fat": 0.0,
+                    "typical_carbs": 0.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            },
+            "сок апельсиновый": {
+                "category": "напитки",
+                "subcategory": "соки",
+                "base_tokens": ["сок", "сок апельсиновый", "сок яблочный", "сок виноградный", "сок томатный", "сок мультифрукт"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": true,
+                    "typical_protein": 0.7,
+                    "typical_fat": 0.2,
+                    "typical_carbs": 10.0
+                },
+                "diet_rules": {
+                    "no_sugar": {
+                        "verdict": "warning",
+                        "condition": "проверить состав на добавленный сахар",
+                        "reason": "в соки часто добавляют сахар"
+                    },
+                    "keto": "forbidden",
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "апельсиновый до 125мл, яблочный исключить",
+                        "reason": "яблочный сок содержит избыток фруктозы и сорбита"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "cola": {
+                "category": "напитки",
+                "subcategory": "газировка",
+                "base_tokens": ["кола", "пепси", "кока-кола", "coca-cola", "pepsi", "газировка", "лимонад"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": true,
+                    "typical_protein": 0.0,
+                    "typical_fat": 0.0,
+                    "typical_carbs": 10.6
+                },
+                "diet_rules": {
+                    "no_sugar": {
+                        "verdict": "warning",
+                        "condition": "можно zero/light без сахара",
+                        "reason": "обычная кола содержит сахар"
+                    },
+                    "keto": {
+                        "verdict": "warning",
+                        "condition": "только zero/light",
+                        "reason": "обычная содержит сахар"
+                    },
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "до 250мл, проверить на фруктозный сироп",
+                        "reason": "может содержать фруктозу"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "чай черный": {
+                "category": "напитки",
+                "subcategory": "чай",
+                "base_tokens": ["чай", "чай черный", "чай зеленый", "чай пакетированный", "чай листовой"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": false,
+                    "typical_protein": 0.0,
+                    "typical_fat": 0.0,
+                    "typical_carbs": 0.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            }
         }
     }
 }
