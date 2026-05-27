@@ -409,9 +409,142 @@ class _ProductTile extends StatelessWidget {
   }
 
   void _onUnknownTap(BuildContext context, ScannedItem item) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Функция классификации будет добавлена позже: ${item.rawText}')),
+    final ScannerController controller = context.read<ScannerController>();
+
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext ctx) {
+        return _ProductSuggestionSheet(
+          rawText: item.rawText,
+          onSuggestionSelected: (String suggestion) {
+            controller.updateItem(item, suggestion);
+          },
+        );
+      },
     );
+  }
+}
+
+class _ProductSuggestionSheet extends StatelessWidget {
+  final String rawText;
+  final ValueChanged<String> onSuggestionSelected;
+
+  const _ProductSuggestionSheet({
+    required this.rawText,
+    required this.onSuggestionSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final List<String> keywords = _extractKeywords(rawText);
+    final List<String> suggestions = _findSuggestions(keywords);
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Что это за продукт?', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 4),
+          Text(rawText, style: TextStyle(fontSize: 13, color: Colors.grey[600])),
+          const SizedBox(height: 12),
+
+          if (keywords.isNotEmpty) ...[
+            Text('Ключевые слова: ${keywords.join(", ")}',
+                style: TextStyle(fontSize: 12, color: Colors.blue[700])),
+            const SizedBox(height: 12),
+          ],
+
+          if (suggestions.isNotEmpty) ...[
+            Text('Возможные варианты:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            ...suggestions.take(8).map((suggestion) => ListTile(
+                  dense: true,
+                  leading: const Icon(Icons.lightbulb_outline, size: 20, color: Colors.amber),
+                  title: Text(suggestion, style: const TextStyle(fontSize: 14)),
+                  onTap: () {
+                    Navigator.pop(context);
+                    onSuggestionSelected(suggestion);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Обновлено: $suggestion')),
+                    );
+                  },
+                )),
+          ] else ...[
+            Text('Ничего не найдено в базе', style: TextStyle(color: Colors.grey[500])),
+          ],
+
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Закрыть'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<String> _extractKeywords(String text) {
+    final List<String> allKeywords = [
+      'молоко', 'творог', 'сыр', 'кефир', 'сметана', 'сливки', 'масло', 'йогурт',
+      'хлеб', 'батон', 'булка', 'лаваш', 'багет',
+      'говядина', 'свинина', 'курица', 'индейка', 'фарш', 'колбаса', 'сосиски',
+      'лосось', 'треска', 'сельдь', 'скумбрия', 'тунец', 'креветки',
+      'огурец', 'помидор', 'перец', 'капуста', 'морковь', 'картофель', 'лук', 'чеснок',
+      'яблоко', 'банан', 'апельсин', 'виноград', 'груша', 'киви',
+      'рис', 'гречка', 'макароны', 'мука', 'сахар', 'соль',
+      'яйцо', 'шоколад', 'печенье', 'чипсы', 'орехи',
+    ];
+
+    final String lowerText = text.toLowerCase();
+    return allKeywords.where((kw) => lowerText.contains(kw)).toList();
+  }
+
+  List<String> _findSuggestions(List<String> keywords) {
+    final List<String> suggestions = [];
+
+    for (final String kw in keywords) {
+      switch (kw) {
+        case 'молоко':
+          suggestions.addAll(['молоко 3.2', 'молоко безлактозное']);
+          break;
+        case 'творог':
+          suggestions.addAll(['творог 5', 'творог 9', 'творог обезжиренный', 'творожная масса']);
+          break;
+        case 'сыр':
+          suggestions.addAll(['сыр российский', 'сыр голландский', 'сыр плавленый', 'сыр моцарелла', 'сыр адыгейский']);
+          break;
+        case 'хлеб':
+          suggestions.addAll(['хлеб пшеничный', 'хлеб ржаной', 'хлеб безглютеновый']);
+          break;
+        case 'курица':
+          suggestions.addAll(['курица целая', 'куриное филе', 'куриное бедро', 'куриный фарш']);
+          break;
+        case 'огурец':
+          suggestions.addAll(['огурец свежий', 'огурец соленый']);
+          break;
+        case 'помидор':
+          suggestions.addAll(['помидор свежий', 'помидоры черри']);
+          break;
+        case 'яблоко':
+          suggestions.addAll(['яблоко']);
+          break;
+        case 'банан':
+          suggestions.addAll(['банан']);
+          break;
+        case 'яйцо':
+          suggestions.addAll(['яйцо куриное', 'яйцо перепелиное']);
+          break;
+        default:
+          suggestions.add('$kw (уточнить)');
+      }
+    }
+
+    return suggestions;
   }
 }
 

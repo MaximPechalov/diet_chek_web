@@ -203,9 +203,11 @@ class CustomizationScreen extends StatefulWidget {
 
 class _CustomizationScreenState extends State<CustomizationScreen> {
   static const String _accentHueKey = 'accent_hue';
-  static const String _backgroundWarmthKey = 'background_warmth';
+  static const String _backgroundHueKey = 'background_hue';
+  static const String _backgroundSaturationKey = 'background_saturation';
   double _accentHue = 120;
-  double _backgroundWarmth = 0;
+  double _backgroundHue = 210;
+  double _backgroundSaturation = 0.05;
 
   @override
   void initState() {
@@ -217,7 +219,8 @@ class _CustomizationScreenState extends State<CustomizationScreen> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _accentHue = prefs.getDouble(_accentHueKey) ?? 120;
-      _backgroundWarmth = prefs.getDouble(_backgroundWarmthKey) ?? 0;
+      _backgroundHue = prefs.getDouble(_backgroundHueKey) ?? 210;
+      _backgroundSaturation = prefs.getDouble(_backgroundSaturationKey) ?? 0.05;
     });
   }
 
@@ -226,9 +229,10 @@ class _CustomizationScreenState extends State<CustomizationScreen> {
     await prefs.setDouble(_accentHueKey, _accentHue);
   }
 
-  Future<void> _saveBackgroundWarmth() async {
+  Future<void> _saveBackground() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble(_backgroundWarmthKey, _backgroundWarmth);
+    await prefs.setDouble(_backgroundHueKey, _backgroundHue);
+    await prefs.setDouble(_backgroundSaturationKey, _backgroundSaturation);
   }
 
   void _setHue(double hue) {
@@ -237,13 +241,20 @@ class _CustomizationScreenState extends State<CustomizationScreen> {
     appKey.currentState?.setAccentColorFromHue(_accentHue);
   }
 
-  void _setBackgroundWarmth(double warmth) {
-    setState(() => _backgroundWarmth = warmth);
-    _saveBackgroundWarmth();
-    appKey.currentState?.setBackgroundWarmth(warmth);
+  void _setBackground(double hue, double saturation) {
+    setState(() {
+      _backgroundHue = hue;
+      _backgroundSaturation = saturation;
+    });
+    _saveBackground();
+    appKey.currentState?.setBackgroundColor(_backgroundHue, _backgroundSaturation);
   }
 
   Color _currentColor() => HSLColor.fromAHSL(1.0, _accentHue, 0.5, 0.5).toColor();
+
+  Color _previewBackgroundColor() {
+    return HSLColor.fromAHSL(1.0, _backgroundHue, _backgroundSaturation, 0.95).toColor();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -273,28 +284,54 @@ class _CustomizationScreenState extends State<CustomizationScreen> {
           Center(child: Text('Оттенок: ${_accentHue.toInt()}°', style: TextStyle(fontSize: 12, color: Colors.grey[600]))),
 
           const SizedBox(height: 32),
-          _buildSectionHeader('Фон', 'Настройте теплоту фона'),
+          _buildSectionHeader('Фон', 'Выберите цвет и насыщенность фона'),
           const SizedBox(height: 16),
 
+          Center(
+            child: Container(
+              width: double.infinity,
+              height: 50,
+              decoration: BoxDecoration(
+                color: _previewBackgroundColor(),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child: Center(
+                child: Text('Превью фона', style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          Text('Цвет фона', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+          const SizedBox(height: 4),
+          _HueSlider(value: _backgroundHue, onChanged: (v) => _setBackground(v, _backgroundSaturation)),
+          const SizedBox(height: 4),
+          Center(child: Text('Оттенок: ${_backgroundHue.toInt()}°', style: TextStyle(fontSize: 11, color: Colors.grey[500]))),
+
+          const SizedBox(height: 16),
+          Text('Насыщенность', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+          const SizedBox(height: 4),
           Row(
             children: [
-              const Icon(Icons.ac_unit, size: 18, color: Colors.blueGrey),
+              const Icon(Icons.blur_off, size: 16, color: Colors.grey),
               Expanded(
                 child: Slider(
-                  value: _backgroundWarmth,
-                  onChanged: (v) => setState(() => _backgroundWarmth = v),
-                  onChangeEnd: (v) {
-                    _saveBackgroundWarmth();
-                    appKey.currentState?.setBackgroundWarmth(v);
-                  },
-                  activeColor: Colors.orange[300],
+                  value: _backgroundSaturation,
                   min: 0,
-                  max: 1,
+                  max: 0.8,
+                  onChanged: (v) => setState(() => _backgroundSaturation = v),
+                  onChangeEnd: (v) {
+                    _saveBackground();
+                    appKey.currentState?.setBackgroundColor(_backgroundHue, _backgroundSaturation);
+                  },
+                  activeColor: _currentColor(),
                 ),
               ),
-              Icon(Icons.wb_sunny, size: 18, color: Colors.orange[300]),
+              const Icon(Icons.blur_on, size: 16, color: Colors.grey),
             ],
           ),
+          Center(child: Text('${(_backgroundSaturation * 100).toInt()}%', style: TextStyle(fontSize: 11, color: Colors.grey[500]))),
 
           const SizedBox(height: 40),
           _buildSectionHeader('Сброс', null),
@@ -304,7 +341,10 @@ class _CustomizationScreenState extends State<CustomizationScreen> {
             leading: const Icon(Icons.restart_alt),
             title: const Text('Сбросить цвет'),
             subtitle: const Text('Вернуть зелёный цвет по умолчанию'),
-            onTap: () => _setHue(120),
+            onTap: () {
+              _setHue(120);
+              _setBackground(210, 0.05);
+            },
           ),
           ListTile(
             leading: const Icon(Icons.delete_sweep),
@@ -312,10 +352,19 @@ class _CustomizationScreenState extends State<CustomizationScreen> {
             subtitle: const Text('Вернуть настройки по умолчанию'),
             onTap: () async {
               final SharedPreferences prefs = await SharedPreferences.getInstance();
-              await prefs.clear();
+              await prefs.setDouble(_accentHueKey, 120);
+              await prefs.setDouble(_backgroundHueKey, 210);
+              await prefs.setDouble(_backgroundSaturationKey, 0.05);
+              setState(() {
+                _accentHue = 120;
+                _backgroundHue = 210;
+                _backgroundSaturation = 0.05;
+              });
+              appKey.currentState?.setAccentColorFromHue(120);
+              appKey.currentState?.setBackgroundColor(210, 0.05);
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Настройки сброшены. Перезапустите приложение.')),
+                  const SnackBar(content: Text('Настройки сброшены.')),
                 );
               }
             },

@@ -19,7 +19,8 @@ class DietChekApp extends StatefulWidget {
 class DietChekAppState extends State<DietChekApp> {
   ThemeMode _themeMode = ThemeMode.system;
   double _accentHue = 120;
-  double _backgroundWarmth = 0;
+  double _backgroundHue = 210;
+  double _backgroundSaturation = 0.05;
 
   @override
   void initState() {
@@ -32,7 +33,8 @@ class DietChekAppState extends State<DietChekApp> {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final String? themeStr = prefs.getString('theme_mode');
       _accentHue = prefs.getDouble('accent_hue') ?? 120;
-      _backgroundWarmth = prefs.getDouble('background_warmth') ?? 0;
+      _backgroundHue = prefs.getDouble('background_hue') ?? 210;
+      _backgroundSaturation = prefs.getDouble('background_saturation') ?? 0.05;
       setState(() {
         switch (themeStr) {
           case 'light':
@@ -56,8 +58,11 @@ class DietChekAppState extends State<DietChekApp> {
     setState(() => _accentHue = hue);
   }
 
-  void setBackgroundWarmth(double warmth) {
-    setState(() => _backgroundWarmth = warmth);
+  void setBackgroundColor(double hue, double saturation) {
+    setState(() {
+      _backgroundHue = hue;
+      _backgroundSaturation = saturation;
+    });
   }
 
   Color get _accentColor => HSLColor.fromAHSL(1.0, _accentHue, 0.5, 0.5).toColor();
@@ -66,11 +71,7 @@ class DietChekAppState extends State<DietChekApp> {
     if (_themeMode == ThemeMode.dark) {
       return const Color(0xFF121212);
     }
-    return Color.lerp(
-      const Color(0xFFF5F5F5),
-      const Color(0xFFF5F0E8),
-      _backgroundWarmth,
-    )!;
+    return HSLColor.fromAHSL(1.0, _backgroundHue, _backgroundSaturation, 0.95).toColor();
   }
 
   @override

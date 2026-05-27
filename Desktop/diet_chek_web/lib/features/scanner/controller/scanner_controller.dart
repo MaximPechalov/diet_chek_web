@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../domain/usecases/scan_receipt.dart';
@@ -6,6 +7,10 @@ import '../../../data/models/receipt.dart';
 import '../../../services/ocr_service.dart';
 import '../../../services/open_food_facts_service.dart';
 import '../../../data/models/online_product.dart';
+import '../../../data/repositories/product_repository.dart';
+import '../../../data/models/diet_rule.dart';
+import '../../../data/models/product.dart';
+import '../../../data/models/scanned_item.dart';
 
 enum ScanDataSource {
   online,
@@ -102,6 +107,59 @@ class ScannerController extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  void updateItem(ScannedItem oldItem, String productKey) {
+    if (_currentReceipt == null) return;
+
+    final ProductRepository productRepository = ProductRepository();
+    final Product? product = productRepository.findByKey(productKey);
+
+    if (product == null) return;
+
+    Map<String, DietRule>? dietResults;
+    dietResults = {};
+    for (final String dietKey in _activeDiets) {
+      final DietRule? rule = product.getRule(dietKey);
+      if (rule != null) {
+        dietResults[dietKey] = rule;
+      }
+    }
+
+    final List<ScannedItem> updatedItems = _currentReceipt!.items.map((item) {
+      if (item == oldItem) {
+        return item.copyWith(
+          matchedProduct: product,
+          dietResults: dietResults,
+        );
+      }
+      return item;
+    }).toList();
+
+    _currentReceipt = _currentReceipt!.copyWith(items: updatedItems);
+    _saveUpdatedReceiptToHistory();
+    notifyListeners();
+  }
+
+  Future<void> _saveUpdatedReceiptToHistory() async {
+    if (_currentReceipt == null) return;
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final List<String> savedReceipts = prefs.getStringList('receipts') ?? [];
+
+      final String updatedJson = jsonEncode(_currentReceipt!.toJson());
+      final int existingIndex = savedReceipts.indexWhere(
+        (String json) => json.contains('"id":"${_currentReceipt!.id}"'),
+      );
+
+      if (existingIndex >= 0) {
+        savedReceipts[existingIndex] = updatedJson;
+      } else {
+        savedReceipts.insert(0, updatedJson);
+      }
+
+      await prefs.setStringList('receipts', savedReceipts);
+    } catch (e) {}
   }
 
   void useOfflineData() {

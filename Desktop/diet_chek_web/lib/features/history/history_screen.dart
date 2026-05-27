@@ -85,6 +85,26 @@ class _HistoryScreenState extends State<HistoryScreen> {
     await prefs.setStringList('receipts', jsonList);
   }
 
+  Color _receiptColor(Receipt receipt) {
+    if (receipt.items.isEmpty) return Colors.grey;
+
+    final ScannedItem? firstAnalyzed = receipt.items.firstWhere(
+      (item) => item.dietResults != null && item.dietResults!.isNotEmpty,
+      orElse: () => receipt.items.first,
+    );
+
+    if (firstAnalyzed?.dietResults == null || firstAnalyzed!.dietResults!.isEmpty) {
+      return Colors.grey;
+    }
+
+    final String firstDiet = firstAnalyzed.dietResults!.keys.first;
+    final double score = receipt.getDietScore(firstDiet);
+
+    if (score >= 0.7) return Colors.green;
+    if (score >= 0.4) return Colors.orange;
+    return Colors.red;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -146,10 +166,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     Container(
                       width: 48, height: 48,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primaryContainer,
+                        color: _receiptColor(receipt).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(Icons.receipt_long, color: Theme.of(context).colorScheme.primary),
+                      child: Icon(
+                        Icons.receipt_long,
+                        color: _receiptColor(receipt),
+                      ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
