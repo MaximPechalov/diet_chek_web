@@ -10,7 +10,7 @@ import 'core/constants/app_colors.dart';
 final GlobalKey<DietChekAppState> appKey = GlobalKey<DietChekAppState>();
 
 class DietChekApp extends StatefulWidget {
-  const DietChekApp() : super(key: appKey);
+  DietChekApp() : super(key: appKey);
 
   @override
   State<DietChekApp> createState() => DietChekAppState();

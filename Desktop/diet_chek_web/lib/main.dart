@@ -8,6 +8,7 @@ import 'data/repositories/product_repository.dart';
 import 'domain/usecases/scan_receipt.dart';
 import 'services/ocr_service.dart';
 import 'services/ingredient_analyzer.dart';
+import 'services/open_food_facts_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,7 +17,6 @@ void main() async {
     DeviceOrientation.portraitUp,
   ]);
 
-  // Загружаем базу продуктов и словарь ингредиентов
   try {
     await LocalDatabase.initialize();
   } catch (e) {
@@ -32,6 +32,7 @@ void main() async {
   final ProductRepository productRepository = ProductRepository();
   final ScanReceiptUseCase scanReceiptUseCase = ScanReceiptUseCase(productRepository);
   final OcrService ocrService = OcrService();
+  final OpenFoodFactsService openFoodFactsService = OpenFoodFactsService();
 
   runApp(
     MultiProvider(
@@ -39,8 +40,9 @@ void main() async {
         Provider<ProductRepository>.value(value: productRepository),
         Provider<ScanReceiptUseCase>.value(value: scanReceiptUseCase),
         Provider<OcrService>.value(value: ocrService),
+        Provider<OpenFoodFactsService>.value(value: openFoodFactsService),
       ],
-      child: const DietChekApp(),
+      child: DietChekApp(),
     ),
   );
 }

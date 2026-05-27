@@ -31,7 +31,10 @@ class ResultScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          _ReceiptSummary(receipt: receipt),
+          _ReceiptSummary(
+           receipt: receipt,
+           dataSource: controller.dataSource?.name,
+           ),
           _DietSummaryCards(receipt: receipt),
           Expanded(
             child: _ProductList(receipt: receipt),
@@ -51,34 +54,83 @@ class ResultScreen extends StatelessWidget {
 
 class _ReceiptSummary extends StatelessWidget {
   final Receipt receipt;
+  final String? dataSource;
 
-  const _ReceiptSummary({required this.receipt});
+  const _ReceiptSummary({required this.receipt, this.dataSource});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+      child: Column(
         children: [
-          _StatItem(
-            icon: Icons.receipt_long,
-            label: 'Всего',
-            value: receipt.totalCount.toString(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _StatItem(
+                icon: Icons.receipt_long,
+                label: 'Всего',
+                value: receipt.totalCount.toString(),
+              ),
+              _StatItem(
+                icon: Icons.check_circle_outline,
+                label: 'Распознано',
+                value: receipt.matchedCount.toString(),
+                color: Colors.green,
+              ),
+              _StatItem(
+                icon: Icons.help_outline,
+                label: 'Неизвестно',
+                value: receipt.unknownCount.toString(),
+                color: Colors.orange,
+              ),
+            ],
           ),
-          _StatItem(
-            icon: Icons.check_circle_outline,
-            label: 'Распознано',
-            value: receipt.matchedCount.toString(),
-            color: Colors.green,
-          ),
-          _StatItem(
-            icon: Icons.help_outline,
-            label: 'Неизвестно',
-            value: receipt.unknownCount.toString(),
-            color: Colors.orange,
-          ),
+          if (dataSource != null && dataSource != 'online' && dataSource != 'local') ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: dataSource == 'offline_timeout'
+                    ? Colors.orange.withOpacity(0.1)
+                    : Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: dataSource == 'offline_timeout'
+                      ? Colors.orange.withOpacity(0.3)
+                      : Colors.red.withOpacity(0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    dataSource == 'offline_timeout'
+                        ? Icons.wifi_off
+                        : Icons.cloud_off,
+                    size: 18,
+                    color: dataSource == 'offline_timeout'
+                        ? Colors.orange[700]
+                        : Colors.red[700],
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      dataSource == 'offline_timeout'
+                          ? 'Сервер не отвечает. Показаны данные из офлайн-базы.'
+                          : 'Нет подключения к интернету. Показаны данные из офлайн-базы.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: dataSource == 'offline_timeout'
+                            ? Colors.orange[700]
+                            : Colors.red[700],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );

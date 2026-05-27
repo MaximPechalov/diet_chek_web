@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../domain/usecases/scan_receipt.dart';
 import '../../services/ocr_service.dart';
+import '../../services/open_food_facts_service.dart';
 import 'controller/scanner_controller.dart';
 import 'result_screen.dart';
 
@@ -23,6 +24,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
         scanReceiptUseCase: context.read<ScanReceiptUseCase>(),
         ocrService: context.read<OcrService>(),
         receiptRepository: null,
+        openFoodFactsService: context.read<OpenFoodFactsService>(),
       ),
       child: Consumer<ScannerController>(
         builder: (BuildContext context, ScannerController controller, Widget? child) {
@@ -67,11 +69,13 @@ class _ScannerScreenState extends State<ScannerScreen> {
         imageQuality: 90,
       );
 
-      if (image == null) return; // Пользователь отменил выбор
+      if (image == null) return;
 
-      await controller.scanReceiptFromFile(image.path);
+      final bool onlineSuccess = await controller.scanReceiptFromFile(image.path);
 
-      if (controller.currentReceipt != null && context.mounted) {
+      if (!mounted) return;
+
+      if (onlineSuccess && controller.currentReceipt != null) {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -81,14 +85,59 @@ class _ScannerScreenState extends State<ScannerScreen> {
             ),
           ),
         );
+      } else if (!onlineSuccess && controller.dataSource != null) {
+        _showOfflineDialog(context, controller);
       }
     } catch (e) {
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Ошибка загрузки: $e')),
         );
       }
     }
+  }
+
+  void _showOfflineDialog(BuildContext context, ScannerController controller) {
+    final String message = controller.dataSource == ScanDataSource.offlineTimeout
+        ? 'Сервер не отвечает (превышено время ожидания).'
+        : 'Нет подключения к интернету.';
+
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Нет доступа к онлайн-базе'),
+          content: Text('$message\n\nИспользовать офлайн-данные?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                controller.reset();
+              },
+              child: const Text('Нет'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                controller.useOfflineData();
+                if (controller.currentReceipt != null && context.mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChangeNotifierProvider<ScannerController>.value(
+                        value: controller,
+                        child: const ResultScreen(),
+                      ),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Да, использовать офлайн'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showScanTips(BuildContext context) {
@@ -265,24 +314,15 @@ class _BottomScanButton extends StatelessWidget {
                 onPressed: controller.isProcessing ? null : onPickFromGallery,
                 icon: controller.isProcessing
                     ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
+                        width: 20, height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                       )
                     : const Icon(Icons.photo_library),
-                label: Text(
-                  controller.isProcessing ? 'Обработка...' : 'Галерея',
-                  style: const TextStyle(fontSize: 16),
-                ),
+                label: const Text('Галерея', style: TextStyle(fontSize: 14)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.secondary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
             ),
@@ -294,24 +334,15 @@ class _BottomScanButton extends StatelessWidget {
                     : () => _onScanPressed(context),
                 icon: controller.isProcessing
                     ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
+                        width: 20, height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                       )
                     : const Icon(Icons.camera_alt),
-                label: Text(
-                  controller.isProcessing ? 'Обработка...' : 'Сканировать',
-                  style: const TextStyle(fontSize: 16),
-                ),
+                label: const Text('Сканировать', style: TextStyle(fontSize: 14)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
             ),
@@ -323,9 +354,11 @@ class _BottomScanButton extends StatelessWidget {
 
   void _onScanPressed(BuildContext context) async {
     final ScannerController controller = context.read<ScannerController>();
-    await controller.scanReceiptFromFile('');
+    final bool onlineSuccess = await controller.scanReceiptFromFile('');
 
-    if (controller.currentReceipt != null && context.mounted) {
+    if (!context.mounted) return;
+
+    if (onlineSuccess && controller.currentReceipt != null) {
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -334,6 +367,47 @@ class _BottomScanButton extends StatelessWidget {
             child: const ResultScreen(),
           ),
         ),
+      );
+    } else if (!onlineSuccess && controller.dataSource != null) {
+      final String message = controller.dataSource == ScanDataSource.offlineTimeout
+          ? 'Сервер не отвечает (превышено время ожидания).'
+          : 'Нет подключения к интернету.';
+
+      showDialog(
+        context: context,
+        builder: (BuildContext dialogContext) {
+          return AlertDialog(
+            title: const Text('Нет доступа к онлайн-базе'),
+            content: Text('$message\n\nИспользовать офлайн-данные?'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(dialogContext);
+                  controller.reset();
+                },
+                child: const Text('Нет'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(dialogContext);
+                  controller.useOfflineData();
+                  if (controller.currentReceipt != null && context.mounted) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChangeNotifierProvider<ScannerController>.value(
+                          value: controller,
+                          child: const ResultScreen(),
+                        ),
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Да, использовать офлайн'),
+              ),
+            ],
+          );
+        },
       );
     }
   }

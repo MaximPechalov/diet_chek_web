@@ -84,7 +84,7 @@ class _CompositionScannerScreenState extends State<CompositionScannerScreen> {
 
     try {
       final OcrService ocrService = context.read<OcrService>();
-      final List<String> lines = await ocrService.recognizeText('');
+      final List<String> lines = await ocrService.recognizeCompositionText('');
       final String compositionText = lines.join(', ');
 
       await _analyzeText(compositionText);
@@ -99,7 +99,7 @@ class _CompositionScannerScreenState extends State<CompositionScannerScreen> {
   Future<void> _analyzeImage(String imagePath) async {
     try {
       final OcrService ocrService = context.read<OcrService>();
-      final List<String> lines = await ocrService.recognizeText(imagePath);
+      final List<String> lines = await ocrService.recognizeCompositionText(imagePath);
 
       if (lines.isEmpty) {
         setState(() {
@@ -287,13 +287,11 @@ class _BottomButtons extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: isProcessing ? null : onPickFromGallery,
                 icon: const Icon(Icons.photo_library),
-                label: const Text('Галерея'),
+                label: const Text('Галерея', style: TextStyle(fontSize: 14)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.secondary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
             ),
@@ -302,13 +300,11 @@ class _BottomButtons extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: isProcessing ? null : onTestData,
                 icon: const Icon(Icons.science),
-                label: const Text('Тест'),
+                label: const Text('Тест', style: TextStyle(fontSize: 14)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
             ),
