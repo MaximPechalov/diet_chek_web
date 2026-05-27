@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../app.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -8,10 +10,14 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  static const String _dietsKey = 'active_diets';
+  static const String _themeKey = 'theme_mode';
+
   bool _noSugar = false;
   bool _keto = false;
   bool _lowFodmap = false;
   bool _lactoseFree = false;
+  ThemeMode _themeMode = ThemeMode.system;
   bool _isLoading = true;
 
   @override
@@ -21,13 +27,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _loadSettings() async {
-    setState(() {
-      _isLoading = false;
-    });
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final List<String> activeDiets = prefs.getStringList(_dietsKey) ?? [];
+      final String? themeStr = prefs.getString(_themeKey);
+
+      setState(() {
+        _noSugar = activeDiets.contains('no_sugar');
+        _keto = activeDiets.contains('keto');
+        _lowFodmap = activeDiets.contains('low_fodmap');
+        _lactoseFree = activeDiets.contains('lactose_free');
+        _themeMode = _parseThemeMode(themeStr);
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+    }
   }
 
-  Future<void> _saveSettings() async {
-    // Не сохраняем в веб-версии
+  Future<void> _saveDiets() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final List<String> activeDiets = [];
+      if (_noSugar) activeDiets.add('no_sugar');
+      if (_keto) activeDiets.add('keto');
+      if (_lowFodmap) activeDiets.add('low_fodmap');
+      if (_lactoseFree) activeDiets.add('lactose_free');
+      await prefs.setStringList(_dietsKey, activeDiets);
+    } catch (e) {}
+  }
+
+  Future<void> _saveTheme() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_themeKey, _themeMode.name);
+    } catch (e) {}
+  }
+
+  ThemeMode _parseThemeMode(String? value) {
+    switch (value) {
+      case 'light':
+        return ThemeMode.light;
+      case 'dark':
+        return ThemeMode.dark;
+      default:
+        return ThemeMode.system;
+    }
   }
 
   void _toggleDiet(bool? value, String dietKey) {
@@ -47,7 +92,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           break;
       }
     });
-    _saveSettings();
+    _saveDiets();
+  }
+
+  void _setThemeMode(ThemeMode mode) {
+    setState(() => _themeMode = mode);
+    _saveTheme();
+    appKey.currentState?.setThemeMode(mode);
   }
 
   @override
@@ -59,13 +110,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Настройки'),
-      ),
+      appBar: AppBar(title: const Text('Настройки')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _buildSectionHeader('Выберите диеты', 'Анализ чека будет проводиться по выбранным диетам'),
+          _buildSectionHeader('Выберите диеты', 'Анализ будет проводиться по выбранным диетам'),
           const SizedBox(height: 8),
 
           _DietSwitchTile(
@@ -76,7 +125,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             color: const Color(0xFF42A5F5),
             icon: Icons.no_food,
           ),
-
           _DietSwitchTile(
             title: 'Кето / Низкоуглеводная',
             subtitle: 'Максимум жиров, минимум углеводов (< 25 г/день)',
@@ -85,27 +133,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
             color: const Color(0xFFFF7043),
             icon: Icons.egg,
           ),
-
           _DietSwitchTile(
             title: 'Low-FODMAP',
-            subtitle: 'Для людей с СРК и вздутием. Исключает ферментируемые углеводы',
+            subtitle: 'Для людей с СРК и вздутием',
             value: _lowFodmap,
             onChanged: (bool? value) => _toggleDiet(value, 'low_fodmap'),
             color: const Color(0xFFAB47BC),
             icon: Icons.healing,
           ),
-
           _DietSwitchTile(
             title: 'Без лактозы',
-            subtitle: 'Исключает молочный сахар. Для людей с лактазной недостаточностью',
+            subtitle: 'Исключает молочный сахар',
             value: _lactoseFree,
             onChanged: (bool? value) => _toggleDiet(value, 'lactose_free'),
             color: const Color(0xFF26A69A),
             icon: Icons.water_drop,
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
+          _buildSectionHeader('Оформление', 'Выберите тему приложения'),
+          const SizedBox(height: 8),
 
+          _ThemeOptionTile(
+            title: 'Светлая',
+            icon: Icons.light_mode,
+            selected: _themeMode == ThemeMode.light,
+            onTap: () => _setThemeMode(ThemeMode.light),
+          ),
+          _ThemeOptionTile(
+            title: 'Тёмная',
+            icon: Icons.dark_mode,
+            selected: _themeMode == ThemeMode.dark,
+            onTap: () => _setThemeMode(ThemeMode.dark),
+          ),
+          _ThemeOptionTile(
+            title: 'Как в системе',
+            icon: Icons.settings_suggest,
+            selected: _themeMode == ThemeMode.system,
+            onTap: () => _setThemeMode(ThemeMode.system),
+          ),
+
+          const SizedBox(height: 32),
           _buildSectionHeader('О приложении', null),
           const SizedBox(height: 8),
 
@@ -116,7 +184,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _showAboutDialog(context),
           ),
-
           ListTile(
             leading: const Icon(Icons.storage),
             title: const Text('База продуктов'),
@@ -124,9 +191,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _showDatabaseInfo(context),
           ),
-
           const Divider(),
-
           ListTile(
             leading: const Icon(Icons.mail_outline),
             title: const Text('Связаться с нами'),
@@ -158,10 +223,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         if (subtitle != null) ...[
           const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-          ),
+          Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
         ],
       ],
     );
@@ -175,9 +237,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           title: const Text('О приложении'),
           content: const Text(
             'DietChek — ваш персональный диетический аудитор.\n\n'
-            'Сфотографируйте чек из магазина и получите мгновенный анализ продуктов '
+            'Сфотографируйте чек или состав продукта и получите мгновенный анализ '
             'по выбранным диетам.\n\n'
-            'Приложение работает полностью офлайн. Ваши чеки хранятся только на устройстве.',
+            'Приложение работает полностью офлайн.',
           ),
           actions: [
             TextButton(
@@ -197,14 +259,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return AlertDialog(
           title: const Text('База продуктов'),
           content: Text(
-            'Текущая версия: 1.0\n'
-            'Дата обновления: 24 мая 2026\n\n'
+            'Текущая версия: 1.0\nДата обновления: 24 мая 2026\n\n'
             'Содержит более 200 продуктов по 4 диетам:\n'
-            '• Без сахара\n'
-            '• Кето\n'
-            '• Low-FODMAP\n'
-            '• Без лактозы\n\n'
-            'База регулярно пополняется. Обновления загружаются автоматически.',
+            '• Без сахара\n• Кето\n• Low-FODMAP\n• Без лактозы\n\n'
+            'База регулярно пополняется.',
           ),
           actions: [
             TextButton(
@@ -254,6 +312,42 @@ class _DietSwitchTile extends StatelessWidget {
         value: value,
         onChanged: onChanged,
         activeColor: color,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+}
+
+class _ThemeOptionTile extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _ThemeOptionTile({
+    required this.title,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 4),
+      child: ListTile(
+        leading: Icon(icon, color: selected ? Theme.of(context).colorScheme.primary : null),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+            color: selected ? Theme.of(context).colorScheme.primary : null,
+          ),
+        ),
+        trailing: selected
+            ? Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary)
+            : null,
+        onTap: onTap,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );

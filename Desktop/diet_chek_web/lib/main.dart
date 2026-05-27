@@ -1,13 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
-void main() {
+import 'app.dart';
+import 'data/datasources/local_database.dart';
+import 'data/repositories/product_repository.dart';
+import 'domain/usecases/scan_receipt.dart';
+import 'services/ocr_service.dart';
+import 'services/ingredient_analyzer.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
+
+  // Загружаем базу продуктов и словарь ингредиентов
+  try {
+    await LocalDatabase.initialize();
+  } catch (e) {
+    print('Ошибка загрузки базы продуктов: $e');
+  }
+
+  try {
+    await IngredientAnalyzer.initialize();
+  } catch (e) {
+    print('Ошибка загрузки словаря ингредиентов: $e');
+  }
+
+  final ProductRepository productRepository = ProductRepository();
+  final ScanReceiptUseCase scanReceiptUseCase = ScanReceiptUseCase(productRepository);
+  final OcrService ocrService = OcrService();
+
   runApp(
-    MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('DietChek работает!', style: TextStyle(fontSize: 24)),
-        ),
-      ),
+    MultiProvider(
+      providers: [
+        Provider<ProductRepository>.value(value: productRepository),
+        Provider<ScanReceiptUseCase>.value(value: scanReceiptUseCase),
+        Provider<OcrService>.value(value: ocrService),
+      ],
+      child: const DietChekApp(),
     ),
   );
 }
