@@ -29,8 +29,12 @@ class ScannerController extends ChangeNotifier {
   List<String> get activeDiets => _activeDiets;
 
   Future<void> _loadActiveDiets() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    _activeDiets = prefs.getStringList('active_diets') ?? [];
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      _activeDiets = prefs.getStringList('active_diets') ?? [];
+    } catch (e) {
+      _activeDiets = [];
+    }
     notifyListeners();
   }
 
@@ -61,8 +65,13 @@ class ScannerController extends ChangeNotifier {
         throw Exception('Не найдено товарных позиций');
       }
 
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final List<String> diets = prefs.getStringList('active_diets') ?? [];
+      List<String> diets = [];
+      try {
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        diets = prefs.getStringList('active_diets') ?? [];
+      } catch (e) {
+        diets = [];
+      }
       print('ШАГ 4: Активные диеты: $diets');
 
       _currentReceipt = _scanReceiptUseCase.execute(productLines, diets);
