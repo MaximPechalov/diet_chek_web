@@ -1,6 +1,4 @@
-// lib/features/settings/settings_screen.dart
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -10,15 +8,10 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  // Ключи для хранения настроек
-  static const String _dietsKey = 'active_diets';
-
-  // Состояние переключателей диет
   bool _noSugar = false;
   bool _keto = false;
   bool _lowFodmap = false;
   bool _lactoseFree = false;
-
   bool _isLoading = true;
 
   @override
@@ -27,35 +20,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadSettings();
   }
 
-  // Загружаем настройки из SharedPreferences
   Future<void> _loadSettings() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final List<String> activeDiets = prefs.getStringList(_dietsKey) ?? [];
-
     setState(() {
-      _noSugar = activeDiets.contains('no_sugar');
-      _keto = activeDiets.contains('keto');
-      _lowFodmap = activeDiets.contains('low_fodmap');
-      _lactoseFree = activeDiets.contains('lactose_free');
       _isLoading = false;
     });
   }
 
-  // Сохраняем выбранные диеты
   Future<void> _saveSettings() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final List<String> activeDiets = [];
-
-    if (_noSugar) activeDiets.add('no_sugar');
-    if (_keto) activeDiets.add('keto');
-    if (_lowFodmap) activeDiets.add('low_fodmap');
-    if (_lactoseFree) activeDiets.add('lactose_free');
-
-    await prefs.setStringList(_dietsKey, activeDiets);
+    // Не сохраняем в веб-версии
   }
 
-  // Переключение диеты с сохранением
-  Future<void> _toggleDiet(bool? value, String dietKey) async {
+  void _toggleDiet(bool? value, String dietKey) {
     setState(() {
       switch (dietKey) {
         case 'no_sugar':
@@ -72,8 +47,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           break;
       }
     });
-
-    await _saveSettings();
+    _saveSettings();
   }
 
   @override
@@ -91,9 +65,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Секция выбора диет
           _buildSectionHeader('Выберите диеты', 'Анализ чека будет проводиться по выбранным диетам'),
-
           const SizedBox(height: 8),
 
           _DietSwitchTile(
@@ -134,9 +106,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const SizedBox(height: 24),
 
-          // Секция информации
           _buildSectionHeader('О приложении', null),
-
           const SizedBox(height: 8),
 
           ListTile(
@@ -248,7 +218,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
-// Виджет одного переключателя диеты
 class _DietSwitchTile extends StatelessWidget {
   final String title;
   final String subtitle;

@@ -15,7 +15,11 @@ void main() async {
     DeviceOrientation.portraitUp,
   ]);
 
-  await LocalDatabase.initialize();
+  try {
+    await LocalDatabase.initialize();
+  } catch (e) {
+    print('Ошибка загрузки базы: $e');
+  }
 
   final ProductRepository productRepository = ProductRepository();
   final ScanReceiptUseCase scanReceiptUseCase = ScanReceiptUseCase(productRepository);
