@@ -2835,6 +2835,332 @@
                     "lactose_free": "allowed"
                 }
             },
+            "редис": {
+                "category": "овощи",
+                "subcategory": "некрахмалистые_овощи",
+                "base_tokens": ["редис", "редиска", "редис свежий"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 0.7,
+                    "typical_fat": 0.1,
+                    "typical_carbs": 1.8
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "до 2 шт",
+                        "reason": "низкое содержание FODMAP"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "дайкон": {
+                "category": "овощи",
+                "subcategory": "некрахмалистые_овощи",
+                "base_tokens": ["дайкон", "редька белая", "японская редька"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 0.6,
+                    "typical_fat": 0.1,
+                    "typical_carbs": 2.5
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "до 1/2 стакана",
+                        "reason": "низкое содержание FODMAP"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+             "редька черная": {
+                "category": "овощи",
+                "subcategory": "некрахмалистые_овощи",
+                "base_tokens": ["редька", "редька черная", "редька зеленая"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 1.0,
+                    "typical_fat": 0.1,
+                    "typical_carbs": 3.4
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "до 1/4 стакана",
+                        "reason": "содержит фруктаны в больших порциях"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "сельдерей": {
+                "category": "овощи",
+                "subcategory": "некрахмалистые_овощи",
+                "base_tokens": ["сельдерей", "сельдерей стебель", "сельдерей корень", "сельдерей черешковый"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 0.7,
+                    "typical_fat": 0.2,
+                    "typical_carbs": 1.4
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "стебель до 1/4 стакана, корень исключить",
+                        "reason": "корень сельдерея содержит маннит"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+             "тыква": {
+                "category": "овощи",
+                "subcategory": "крахмалистые_овощи",
+                "base_tokens": ["тыква", "тыква свежая", "тыква запеченая"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 1.0,
+                    "typical_fat": 0.1,
+                    "typical_carbs": 4.4
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": {
+                        "verdict": "warning",
+                        "condition": "до 1/2 стакана",
+                        "reason": "содержит углеводы"
+                    },
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "до 1/3 стакана",
+                        "reason": "низкое содержание FODMAP"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+             "репа": {
+                "category": "овощи",
+                "subcategory": "корнеплоды",
+                "base_tokens": ["репа", "репа свежая", "репа желтая"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 0.9,
+                    "typical_fat": 0.1,
+                    "typical_carbs": 4.6
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": {
+                        "verdict": "warning",
+                        "condition": "в небольших количествах",
+                        "reason": "содержит углеводы"
+                    },
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "до 1/2 стакана",
+                        "reason": "содержит фруктаны"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+             "пастернак": {
+                "category": "овощи",
+                "subcategory": "корнеплоды",
+                "base_tokens": ["пастернак", "пастернак корень", "белая морковь"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 1.2,
+                    "typical_fat": 0.3,
+                    "typical_carbs": 13.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": {
+                        "verdict": "warning",
+                        "condition": "очень ограниченно",
+                        "reason": "высокое содержание углеводов"
+                    },
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "до 1/4 стакана",
+                        "reason": "содержит фруктаны"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "фасоль красная": {
+                "category": "овощи",
+                "subcategory": "бобовые",
+                "base_tokens": ["фасоль красная", "фасоль консервированная", "фасоль вареная", "фасоль белая"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 8.0,
+                    "typical_fat": 0.5,
+                    "typical_carbs": 15.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": {
+                        "verdict": "warning",
+                        "condition": "очень ограниченно",
+                        "reason": "содержит углеводы и крахмал"
+                    },
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "консервированная промытая до 1/4 стакана",
+                        "reason": "содержит галактаны"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "нут": {
+                "category": "овощи",
+                "subcategory": "бобовые",
+                "base_tokens": ["нут", "нут консервированный", "нут вареный", "турецкий горох", "хумус"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 9.0,
+                    "typical_fat": 2.6,
+                    "typical_carbs": 17.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": {
+                        "verdict": "warning",
+                        "condition": "очень ограниченно",
+                        "reason": "содержит углеводы"
+                    },
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "консервированный промытый до 42г",
+                        "reason": "содержит галактаны"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "чечевица": {
+                "category": "овощи",
+                "subcategory": "бобовые",
+                "base_tokens": ["чечевица", "чечевица красная", "чечевица зеленая", "чечевица вареная"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 9.0,
+                    "typical_fat": 0.4,
+                    "typical_carbs": 20.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": {
+                        "verdict": "warning",
+                        "condition": "очень ограниченно",
+                        "reason": "высокое содержание углеводов"
+                    },
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "консервированная промытая до 1/4 стакана",
+                        "reason": "содержит галактаны"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "лук-порей": {
+                "category": "овощи",
+                "subcategory": "луковые",
+                "base_tokens": ["лук-порей", "порей", "лук порей"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 1.5,
+                    "typical_fat": 0.3,
+                    "typical_carbs": 12.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": {
+                        "verdict": "warning",
+                        "condition": "в небольших количествах",
+                        "reason": "содержит углеводы"
+                    },
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "только зеленая часть, белую исключить",
+                        "reason": "белая часть содержит фруктаны"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "имбирь": {
+                "category": "овощи",
+                "subcategory": "корнеплоды",
+                "base_tokens": ["имбирь", "имбирь корень", "имбирь свежий", "имбирь маринованный"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 1.8,
+                    "typical_fat": 0.8,
+                    "typical_carbs": 15.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": {
+                        "verdict": "allowed",
+                        "condition": "как специя, в небольших количествах",
+                        "reason": "используется мало"
+                    },
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "до 1 ч.л. свежего",
+                        "reason": "низкое содержание FODMAP"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "хрен": {
+                "category": "овощи",
+                "subcategory": "корнеплоды",
+                "base_tokens": ["хрен", "хрен столовый", "хрен тертый", "хрен со свеклой"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": true,
+                    "typical_protein": 2.0,
+                    "typical_fat": 0.4,
+                    "typical_carbs": 10.0
+                },
+                "diet_rules": {
+                    "no_sugar": {
+                        "verdict": "warning",
+                        "reason": "столовый хрен часто содержит сахар"
+                    },
+                    "keto": {
+                        "verdict": "allowed",
+                        "condition": "как приправа, до 1 ст.л.",
+                        "reason": "используется в малых количествах"
+                    },
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "до 1 ст.л.",
+                        "reason": "низкое содержание FODMAP"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
             "помидор свежий": {
                 "category": "овощи",
                 "subcategory": "некрахмалистые_овощи",
@@ -3330,7 +3656,83 @@
                     "lactose_free": "allowed"
                 }
             },
-            "салат листовой": {
+            "щавель": {
+                "category": "зелень",
+                "subcategory": "салаты",
+                "base_tokens": ["щавель", "щавель свежий", "щавель консервированный"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 1.5,
+                    "typical_fat": 0.3,
+                    "typical_carbs": 2.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "до 1/2 стакана",
+                        "reason": "низкое содержание FODMAP"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "мята": {
+                "category": "зелень",
+                "subcategory": "пряные травы",
+                "base_tokens": ["мята", "мята свежая", "мята сушеная", "мелисса"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 3.3,
+                    "typical_fat": 0.7,
+                    "typical_carbs": 5.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            },
+             "розмарин": {
+                "category": "зелень",
+                "subcategory": "пряные травы",
+                "base_tokens": ["розмарин", "розмарин свежий", "розмарин сушеный"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 3.3,
+                    "typical_fat": 5.9,
+                    "typical_carbs": 20.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            },
+            "тимьян": {
+                "category": "зелень",
+                "subcategory": "пряные травы",
+                "base_tokens": ["тимьян", "тимьян свежий", "чабрец", "тимьян сушеный"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 1.7,
+                    "typical_fat": 0.5,
+                    "typical_carbs": 10.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            },
+                "салат листовой": {
                 "category": "зелень",
                 "subcategory": "салаты",
                 "base_tokens": ["салат", "салат листовой", "латук", "айсберг", "салат айсберг", "лолло росса", "романо"],
@@ -3466,6 +3868,77 @@
                     "lactose_free": "allowed"
                 }
             },
+             "лисички": {
+                "category": "грибы",
+                "subcategory": "лесные",
+                "base_tokens": ["лисички", "лисички свежие", "лисички замороженные", "лисички маринованные"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 1.5,
+                    "typical_fat": 0.5,
+                    "typical_carbs": 1.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "до 50г",
+                        "reason": "лесные грибы содержат маннит"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "опята": {
+                "category": "грибы",
+                "subcategory": "лесные",
+                "base_tokens": ["опята", "опята свежие", "опята замороженные", "опята маринованные"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": true,
+                    "typical_protein": 2.0,
+                    "typical_fat": 0.5,
+                    "typical_carbs": 2.5
+                },
+                "diet_rules": {
+                    "no_sugar": {
+                        "verdict": "warning",
+                        "condition": "маринованные содержат сахар",
+                        "reason": "в маринаде часто есть сахар"
+                    },
+                    "keto": "allowed",
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "до 50г, маринованные проверить на чеснок/лук",
+                        "reason": "содержат маннит, маринад может содержать FODMAP"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "шиитаке": {
+                "category": "грибы",
+                "subcategory": "культивируемые",
+                "base_tokens": ["шиитаке", "шиитаке свежие", "шиитаке сушеные"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 2.2,
+                    "typical_fat": 0.5,
+                    "typical_carbs": 4.3
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "до 50г",
+                        "reason": "содержит маннит"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
              "белые грибы": {
                 "category": "грибы",
                 "subcategory": "лесные",
@@ -3552,6 +4025,196 @@
                         "verdict": "warning",
                         "condition": "только зеленый, до 1/2 шт",
                         "reason": "спелый банан богат фруктанами"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "апельсин красный": {
+                "category": "фрукты",
+                "subcategory": "цитрусовые",
+                "base_tokens": ["апельсин красный", "красный апельсин", "сицилийский апельсин", "королек"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 0.9,
+                    "typical_fat": 0.1,
+                    "typical_carbs": 11.8
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": {
+                        "verdict": "warning",
+                        "condition": "очень ограниченно",
+                        "reason": "содержит углеводы"
+                    },
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "до 1 шт",
+                        "reason": "низкое содержание FODMAP"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "лайм": {
+                "category": "фрукты",
+                "subcategory": "цитрусовые",
+                "base_tokens": ["лайм", "лайм свежий"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 0.7,
+                    "typical_fat": 0.2,
+                    "typical_carbs": 8.4
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            },
+            "помело": {
+                "category": "фрукты",
+                "subcategory": "цитрусовые",
+                "base_tokens": ["помело", "помело свежий"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 0.8,
+                    "typical_fat": 0.1,
+                    "typical_carbs": 9.6
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": {
+                        "verdict": "warning",
+                        "condition": "до 1/4 шт",
+                        "reason": "содержит углеводы"
+                    },
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "до 1/2 стакана",
+                        "reason": "низкое содержание FODMAP"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+             "нектарин": {
+                "category": "фрукты",
+                "subcategory": "косточковые",
+                "base_tokens": ["нектарин", "нектарины", "нектарин свежий"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 1.1,
+                    "typical_fat": 0.3,
+                    "typical_carbs": 10.5
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": {
+                        "verdict": "warning",
+                        "condition": "очень ограниченно",
+                        "reason": "содержит углеводы"
+                    },
+                    "low_fodmap": {
+                        "verdict": "forbidden",
+                        "condition": "полностью исключить",
+                        "reason": "содержит сорбит и фруктаны"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "алыча": {
+                "category": "фрукты",
+                "subcategory": "косточковые",
+                "base_tokens": ["алыча", "алыча свежая", "слива вишневая"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 0.7,
+                    "typical_fat": 0.2,
+                    "typical_carbs": 9.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": {
+                        "verdict": "warning",
+                        "condition": "очень ограниченно",
+                        "reason": "содержит углеводы"
+                    },
+                    "low_fodmap": {
+                        "verdict": "forbidden",
+                        "reason": "содержит сорбит"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "инжир": {
+                "category": "фрукты",
+                "subcategory": "тропические",
+                "base_tokens": ["инжир", "инжир свежий", "фига"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 0.8,
+                    "typical_fat": 0.3,
+                    "typical_carbs": 19.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "forbidden",
+                    "low_fodmap": {
+                        "verdict": "forbidden",
+                        "reason": "высокое содержание фруктозы и фруктанов"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+             "кокос": {
+                "category": "фрукты",
+                "subcategory": "тропические",
+                "base_tokens": ["кокос", "кокос свежий", "кокосовая стружка", "кокос сушеный"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 3.3,
+                    "typical_fat": 33.0,
+                    "typical_carbs": 6.2
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "до 1/4 стакана мякоти",
+                        "reason": "низкое содержание FODMAP"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+             "папайя": {
+                "category": "фрукты",
+                "subcategory": "тропические",
+                "base_tokens": ["папайя", "папайя свежая"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 0.5,
+                    "typical_fat": 0.3,
+                    "typical_carbs": 10.8
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": {
+                        "verdict": "warning",
+                        "condition": "до 1/2 стакана",
+                        "reason": "содержит углеводы"
+                    },
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "до 1/2 стакана",
+                        "reason": "низкое содержание FODMAP"
                     },
                     "lactose_free": "allowed"
                 }
@@ -4001,6 +4664,111 @@
                     "lactose_free": "allowed"
                 }
             },
+            "крыжовник": {
+                "category": "ягоды",
+                "subcategory": "свежие ягоды",
+                "base_tokens": ["крыжовник", "крыжовник свежий", "крыжовник зеленый", "крыжовник красный"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 0.9,
+                    "typical_fat": 0.6,
+                    "typical_carbs": 5.4
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": {
+                        "verdict": "allowed",
+                        "condition": "до 1/2 стакана",
+                        "reason": "низкое содержание углеводов"
+                    },
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "до 1/4 стакана",
+                        "reason": "содержит фруктаны"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+             "облепиха": {
+                "category": "ягоды",
+                "subcategory": "свежие ягоды",
+                "base_tokens": ["облепиха", "облепиха свежая", "облепиха замороженная"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 1.2,
+                    "typical_fat": 5.4,
+                    "typical_carbs": 5.7
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": {
+                        "verdict": "allowed",
+                        "condition": "до 1/4 стакана",
+                        "reason": "низкое содержание углеводов"
+                    },
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "до 1 ст.л.",
+                        "reason": "низкое содержание FODMAP"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "брусника": {
+                "category": "ягоды",
+                "subcategory": "свежие ягоды",
+                "base_tokens": ["брусника", "брусника свежая", "брусника замороженная", "брусника моченая"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": true,
+                    "typical_protein": 0.4,
+                    "typical_fat": 0.1,
+                    "typical_carbs": 6.0
+                },
+                "diet_rules": {
+                    "no_sugar": {
+                        "verdict": "warning",
+                        "condition": "моченая содержит сахар",
+                        "reason": "в моченую бруснику добавляют сахар"
+                    },
+                    "keto": "allowed",
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "до 1 ст.л.",
+                        "reason": "низкое содержание FODMAP"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "черноплодная рябина": {
+                "category": "ягоды",
+                "subcategory": "свежие ягоды",
+                "base_tokens": ["черноплодная рябина", "арония", "рябина черноплодная"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 1.4,
+                    "typical_fat": 0.2,
+                    "typical_carbs": 11.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": {
+                        "verdict": "warning",
+                        "condition": "до 1 ст.л.",
+                        "reason": "содержит углеводы"
+                    },
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "до 1 ст.л.",
+                        "reason": "содержит сорбит"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
             "черника": {
                 "category": "ягоды",
                 "subcategory": "свежие ягоды",
@@ -4200,6 +4968,72 @@
                     "lactose_free": "allowed"
                 }
             },
+            "сушеные яблоки": {
+                "category": "сухофрукты",
+                "subcategory": "фруктовые",
+                "base_tokens": ["сушеные яблоки", "яблоки сушеные", "яблочные чипсы", "яблочная сушка"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": false,
+                    "typical_protein": 1.0,
+                    "typical_fat": 0.3,
+                    "typical_carbs": 65.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "forbidden",
+                    "low_fodmap": {
+                        "verdict": "forbidden",
+                        "reason": "концентрированный источник фруктозы и сорбита"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+             "сушеные груши": {
+                "category": "сухофрукты",
+                "subcategory": "фруктовые",
+                "base_tokens": ["сушеные груши", "груши сушеные", "грушевая сушка"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": false,
+                    "typical_protein": 0.9,
+                    "typical_fat": 0.2,
+                    "typical_carbs": 70.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "forbidden",
+                    "low_fodmap": {
+                        "verdict": "forbidden",
+                        "reason": "экстремально высокое содержание фруктозы и сорбита"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+                "цукаты": {
+                "category": "сухофрукты",
+                "subcategory": "фруктовые",
+                "base_tokens": ["цукаты", "цукаты ананасовые", "цукаты папайи", "цукаты дынные", "фрукты засахаренные"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": true,
+                    "typical_protein": 0.5,
+                    "typical_fat": 0.1,
+                    "typical_carbs": 78.0
+                },
+                "diet_rules": {
+                    "no_sugar": "forbidden",
+                    "keto": "forbidden",
+                    "low_fodmap": {
+                        "verdict": "forbidden",
+                        "reason": "содержат сахарный сироп, могут содержать фруктозу"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
              "изюм": {
                 "category": "сухофрукты",
                 "subcategory": "ягоды",
@@ -4310,6 +5144,183 @@
                         "verdict": "allowed",
                         "condition": "до 1 стакана вареного (190г)",
                         "reason": "не содержит FODMAP"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "рис пропаренный": {
+                "category": "бакалея",
+                "subcategory": "крупы",
+                "base_tokens": ["рис пропаренный", "рис золотистый", "рис обработанный паром"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 7.0,
+                    "typical_fat": 0.4,
+                    "typical_carbs": 78.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "forbidden",
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "до 1 стакана вареного",
+                        "reason": "не содержит FODMAP"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "рис для ризотто": {
+                "category": "бакалея",
+                "subcategory": "крупы",
+                "base_tokens": ["рис арборио", "рис для ризотто", "рис карнароли", "рис виалоне"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 7.0,
+                    "typical_fat": 0.5,
+                    "typical_carbs": 76.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "forbidden",
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "до 1 стакана вареного",
+                        "reason": "не содержит FODMAP"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+             "сухари панировочные": {
+                "category": "бакалея",
+                "subcategory": "панировка",
+                "base_tokens": ["сухари панировочные", "панировочные сухари", "сухари для панировки", "панировка"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": true,
+                    "hidden_sugar": false,
+                    "typical_protein": 9.0,
+                    "typical_fat": 1.5,
+                    "typical_carbs": 65.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "forbidden",
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "до 2 ст.л.",
+                        "reason": "содержит пшеницу"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+             "кукурузная крупа": {
+                "category": "бакалея",
+                "subcategory": "крупы",
+                "base_tokens": ["кукурузная крупа", "кукурузная каша", "полента", "мамалыга"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 8.3,
+                    "typical_fat": 1.2,
+                    "typical_carbs": 71.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "forbidden",
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "до 1/2 стакана вареной",
+                        "reason": "не содержит FODMAP в умеренных порциях"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+             "горох колотый": {
+                "category": "бакалея",
+                "subcategory": "крупы",
+                "base_tokens": ["горох", "горох колотый", "горох сушеный", "гороховая каша"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 21.0,
+                    "typical_fat": 2.0,
+                    "typical_carbs": 50.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "forbidden",
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "консервированный промытый до 1/4 стакана, сухой исключить",
+                        "reason": "сухой горох содержит высокий уровень галактанов"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "киноа": {
+                "category": "бакалея",
+                "subcategory": "крупы",
+                "base_tokens": ["киноа", "квиноа", "киноа белая", "киноа красная", "киноа черная"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 14.0,
+                    "typical_fat": 6.0,
+                    "typical_carbs": 57.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "forbidden",
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "до 1 стакана вареной",
+                        "reason": "не содержит FODMAP"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+             "мука цельнозерновая": {
+                "category": "бакалея",
+                "subcategory": "мука",
+                "base_tokens": ["мука цельнозерновая", "мука обойная", "мука из цельного зерна", "мука пшеничная цельнозерновая"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": true,
+                    "typical_protein": 13.0,
+                    "typical_fat": 2.2,
+                    "typical_carbs": 61.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "forbidden",
+                    "low_fodmap": {
+                        "verdict": "forbidden",
+                        "condition": "полностью исключить",
+                        "reason": "высокое содержание фруктанов в цельном зерне"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+             "мука овсяная": {
+                "category": "бакалея",
+                "subcategory": "мука",
+                "base_tokens": ["мука овсяная", "овсяная мука", "толокно"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": true,
+                    "typical_protein": 13.0,
+                    "typical_fat": 6.5,
+                    "typical_carbs": 58.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "forbidden",
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "до 1/4 стакана, безглютеновая лучше",
+                        "reason": "содержит фруктаны, часто загрязнена глютеном"
                     },
                     "lactose_free": "allowed"
                 }
@@ -4669,6 +5680,131 @@
                     "lactose_free": "allowed"
                 }
             },
+             "хлеб цельнозерновой": {
+                "category": "хлеб",
+                "subcategory": "черный хлеб",
+                "base_tokens": ["хлеб цельнозерновой", "хлеб из цельного зерна", "хлеб мультизлаковый", "хлеб с отрубями"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": true,
+                    "hidden_sugar": true,
+                    "typical_protein": 9.0,
+                    "typical_fat": 3.0,
+                    "typical_carbs": 40.0
+                },
+                "diet_rules": {
+                    "no_sugar": {
+                        "verdict": "warning",
+                        "condition": "проверить состав на сахар/патоку",
+                        "reason": "может содержать добавленный сахар"
+                    },
+                    "keto": "forbidden",
+                    "low_fodmap": {
+                        "verdict": "forbidden",
+                        "condition": "полностью исключить",
+                        "reason": "высокое содержание фруктанов в цельном зерне"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+             "хлеб тостовый": {
+                "category": "хлеб",
+                "subcategory": "белый хлеб",
+                "base_tokens": ["хлеб тостовый", "хлеб для тостов", "тостовый хлеб", "хлеб сэндвичный"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": true,
+                    "hidden_sugar": true,
+                    "typical_protein": 7.5,
+                    "typical_fat": 3.5,
+                    "typical_carbs": 47.0
+                },
+                "diet_rules": {
+                    "no_sugar": {
+                        "verdict": "warning",
+                        "condition": "проверить состав на сахар",
+                        "reason": "часто содержит сахар и масло"
+                    },
+                    "keto": "forbidden",
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "до 1 ломтика, белый лучше цельнозернового",
+                        "reason": "содержит фруктаны пшеницы"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "булочка сдобная": {
+                "category": "выпечка",
+                "subcategory": "сладкая выпечка",
+                "base_tokens": ["булочка", "булочка сдобная", "булочка с маком", "булочка с корицей", "плюшка", "ватрушка"],
+                "attributes": {
+                    "contains_lactose": true,
+                    "contains_gluten": true,
+                    "hidden_sugar": true,
+                    "typical_protein": 8.0,
+                    "typical_fat": 10.0,
+                    "typical_carbs": 55.0
+                },
+                "diet_rules": {
+                    "no_sugar": "forbidden",
+                    "keto": "forbidden",
+                    "low_fodmap": {
+                        "verdict": "forbidden",
+                        "reason": "содержит пшеницу, лактозу, сахар"
+                    },
+                    "lactose_free": "forbidden"
+                }
+            },
+            "круассан": {
+                "category": "выпечка",
+                "subcategory": "сладкая выпечка",
+                "base_tokens": ["круассан", "круассан сливочный", "круассан с шоколадом"],
+                "attributes": {
+                    "contains_lactose": true,
+                    "contains_gluten": true,
+                    "hidden_sugar": true,
+                    "typical_protein": 7.0,
+                    "typical_fat": 21.0,
+                    "typical_carbs": 45.0
+                },
+                "diet_rules": {
+                    "no_sugar": "forbidden",
+                    "keto": "forbidden",
+                    "low_fodmap": {
+                        "verdict": "forbidden",
+                        "reason": "содержит пшеницу, лактозу, сахар"
+                    },
+                    "lactose_free": "forbidden"
+                }
+            },
+             "сушки": {
+                "category": "выпечка",
+                "subcategory": "хлебобулочные",
+                "base_tokens": ["сушки", "сушки маковые", "сушки ванильные", "сушки простые", "баранки"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": true,
+                    "hidden_sugar": true,
+                    "typical_protein": 11.0,
+                    "typical_fat": 1.3,
+                    "typical_carbs": 70.0
+                },
+                "diet_rules": {
+                    "no_sugar": {
+                        "verdict": "warning",
+                        "condition": "проверить состав на сахар",
+                        "reason": "могут содержать сахар"
+                    },
+                    "keto": "forbidden",
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "до 2 шт",
+                        "reason": "содержит пшеницу"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
             "хлеб ржаной": {
                 "category": "хлеб",
                 "subcategory": "черный хлеб",
@@ -4901,6 +6037,51 @@
                     }
                 }
             },
+            "шоколад белый": {
+                "category": "сладости",
+                "subcategory": "шоколад",
+                "base_tokens": ["шоколад белый", "белый шоколад", "шоколад белый пористый"],
+                "attributes": {
+                    "contains_lactose": true,
+                    "contains_gluten": false,
+                    "hidden_sugar": true,
+                    "typical_protein": 5.0,
+                    "typical_fat": 32.0,
+                    "typical_carbs": 59.0
+                },
+                "diet_rules": {
+                    "no_sugar": "forbidden",
+                    "keto": "forbidden",
+                    "low_fodmap": {
+                        "verdict": "forbidden",
+                        "reason": "содержит лактозу и сахар"
+                    },
+                    "lactose_free": "forbidden"
+                }
+            },
+             "халва": {
+                "category": "сладости",
+                "subcategory": "восточные сладости",
+                "base_tokens": ["халва", "халва подсолнечная", "халва тахинная", "халва арахисовая"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": true,
+                    "typical_protein": 13.0,
+                    "typical_fat": 30.0,
+                    "typical_carbs": 50.0
+                },
+                "diet_rules": {
+                    "no_sugar": "forbidden",
+                    "keto": "forbidden",
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "до 1 кусочка 20г, проверить на мед/фруктозу",
+                        "reason": "может содержать мед или фруктозный сироп"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
             "конфеты": {
                 "category": "сладости",
                 "subcategory": "конфеты",
@@ -4980,6 +6161,37 @@
                         "condition": "проверить состав на сыворотку/сухое молоко",
                         "reason": "молочные компоненты в приправах"
                     }
+                }
+            },
+             "попкорн": {
+                "category": "снеки",
+                "subcategory": "соленые снеки",
+                "base_tokens": ["попкорн", "попкорн соленый", "попкорн карамельный", "воздушная кукуруза"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": true,
+                    "typical_protein": 12.0,
+                    "typical_fat": 4.0,
+                    "typical_carbs": 63.0
+                },
+                "diet_rules": {
+                    "no_sugar": {
+                        "verdict": "warning",
+                        "condition": "соленый без добавок разрешен, карамельный запрещен",
+                        "reason": "карамельный содержит сахар"
+                    },
+                    "keto": {
+                        "verdict": "warning",
+                        "condition": "домашний без масла до 1 стакана",
+                        "reason": "содержит углеводы"
+                    },
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "до 1 стакана, без добавок",
+                        "reason": "кукуруза низко-FODMAP в умеренных порциях"
+                    },
+                    "lactose_free": "allowed"
                 }
             },
             "орехи соленые": {
@@ -5115,6 +6327,126 @@
                     "lactose_free": "allowed"
                 }
             },
+             "энергетический напиток": {
+                "category": "напитки",
+                "subcategory": "газировка",
+                "base_tokens": ["энергетик", "энергетический напиток", "редбулл", "берн", "монстер", "адреналин"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": true,
+                    "typical_protein": 0.0,
+                    "typical_fat": 0.0,
+                    "typical_carbs": 11.0
+                },
+                "diet_rules": {
+                    "no_sugar": {
+                        "verdict": "warning",
+                        "condition": "можно без сахара",
+                        "reason": "обычный содержит сахар"
+                    },
+                    "keto": {
+                        "verdict": "warning",
+                        "condition": "только без сахара",
+                        "reason": "обычный содержит сахар"
+                    },
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "до 1 банки",
+                        "reason": "может содержать фруктозу"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+             "квас": {
+                "category": "напитки",
+                "subcategory": "безалкогольные",
+                "base_tokens": ["квас", "квас хлебный", "квас окрошечный", "квас домашний"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": true,
+                    "hidden_sugar": true,
+                    "typical_protein": 0.3,
+                    "typical_fat": 0.0,
+                    "typical_carbs": 5.0
+                },
+                "diet_rules": {
+                    "no_sugar": {
+                        "verdict": "warning",
+                        "condition": "проверить состав на сахар",
+                        "reason": "часто содержит сахар"
+                    },
+                    "keto": {
+                        "verdict": "warning",
+                        "condition": "до 1 стакана",
+                        "reason": "содержит углеводы и глютен"
+                    },
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "до 1 стакана, проверить на фруктозу",
+                        "reason": "содержит глютен, возможна фруктоза"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "компот": {
+                "category": "напитки",
+                "subcategory": "безалкогольные",
+                "base_tokens": ["компот", "компот из сухофруктов", "компот яблочный", "компот вишневый"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": true,
+                    "typical_protein": 0.2,
+                    "typical_fat": 0.0,
+                    "typical_carbs": 10.0
+                },
+                "diet_rules": {
+                    "no_sugar": {
+                        "verdict": "warning",
+                        "condition": "домашний без сахара разрешен",
+                        "reason": "в покупной добавляют сахар"
+                    },
+                    "keto": {
+                        "verdict": "warning",
+                        "condition": "без сахара, до 1 стакана",
+                        "reason": "содержит углеводы из фруктов"
+                    },
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "зависит от фруктов: яблочный и грушевый запрещены",
+                        "reason": "яблоки и груши содержат сорбит и фруктозу"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+                "кисель": {
+                "category": "напитки",
+                "subcategory": "безалкогольные",
+                "base_tokens": ["кисель", "кисель ягодный", "кисель фруктовый", "кисель в брикетах"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": true,
+                    "typical_protein": 0.1,
+                    "typical_fat": 0.0,
+                    "typical_carbs": 15.0
+                },
+                "diet_rules": {
+                    "no_sugar": {
+                        "verdict": "forbidden",
+                        "condition": "можно домашний на стевии",
+                        "reason": "содержит много сахара и крахмала"
+                    },
+                    "keto": "forbidden",
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "проверить состав на фруктозу/яблочное пюре",
+                        "reason": "может содержать FODMAP-фрукты"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
             "чай черный": {
                 "category": "напитки",
                 "subcategory": "чай",
@@ -5131,6 +6463,362 @@
                     "no_sugar": "allowed",
                     "keto": "allowed",
                     "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            }
+        },
+        "соусы_приправы": {
+             "соус барбекю": {
+                "category": "соусы",
+                "subcategory": "соусы",
+                "base_tokens": ["соус барбекю", "барбекю соус", "bbq соус", "соус для гриля"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": true,
+                    "typical_protein": 1.0,
+                    "typical_fat": 0.5,
+                    "typical_carbs": 30.0
+                },
+                "diet_rules": {
+                    "no_sugar": "forbidden",
+                    "keto": "forbidden",
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "проверить на чеснок/луковый порошок",
+                        "reason": "часто содержит чеснок и лук"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+             "соус чесночный": {
+                "category": "соусы",
+                "subcategory": "соусы",
+                "base_tokens": ["соус чесночный", "чесночный соус", "соус с чесноком"],
+                "attributes": {
+                    "contains_lactose": true,
+                    "contains_gluten": false,
+                    "hidden_sugar": true,
+                    "typical_protein": 2.0,
+                    "typical_fat": 20.0,
+                    "typical_carbs": 6.0
+                },
+                "diet_rules": {
+                    "no_sugar": {
+                        "verdict": "warning",
+                        "reason": "может содержать сахар"
+                    },
+                    "keto": {
+                        "verdict": "allowed",
+                        "condition": "до 1 ст.л.",
+                        "reason": "низкое содержание углеводов"
+                    },
+                    "low_fodmap": {
+                        "verdict": "forbidden",
+                        "reason": "содержит чеснок"
+                    },
+                    "lactose_free": {
+                        "verdict": "warning",
+                        "reason": "может содержать сливки или сыр"
+                    }
+                }
+            },
+            "уксус": {
+                "category": "соусы",
+                "subcategory": "приправы",
+                "base_tokens": ["уксус", "уксус столовый", "уксус яблочный", "уксус винный", "уксус бальзамический"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": false,
+                    "typical_protein": 0.0,
+                    "typical_fat": 0.0,
+                    "typical_carbs": 1.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "до 2 ст.л., бальзамический до 1 ст.л.",
+                        "reason": "бальзамический содержит больше фруктозы"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "масло оливковое extra virgin": {
+                "category": "соусы",
+                "subcategory": "масла",
+                "base_tokens": ["оливковое масло", "масло оливковое", "extra virgin", "масло оливковое нерафинированное"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 0.0,
+                    "typical_fat": 99.8,
+                    "typical_carbs": 0.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            }
+        },
+        "орехи": {
+            "кешью": {
+                "category": "орехи",
+                "subcategory": "орехи",
+                "base_tokens": ["кешью", "кешью жареный", "кешью соленый", "кешью сырой"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": false,
+                    "typical_protein": 18.0,
+                    "typical_fat": 44.0,
+                    "typical_carbs": 27.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": {
+                        "verdict": "warning",
+                        "condition": "до 20г",
+                        "reason": "содержит больше углеводов, чем другие орехи"
+                    },
+                    "low_fodmap": {
+                        "verdict": "forbidden",
+                        "reason": "высокое содержание фруктанов и галактанов"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "фисташки": {
+                "category": "орехи",
+                "subcategory": "орехи",
+                "base_tokens": ["фисташки", "фисташки соленые", "фисташки жареные", "фисташки сырые"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": false,
+                    "typical_protein": 20.0,
+                    "typical_fat": 45.0,
+                    "typical_carbs": 17.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": {
+                        "verdict": "warning",
+                        "condition": "до 20г",
+                        "reason": "содержит углеводы"
+                    },
+                    "low_fodmap": {
+                        "verdict": "forbidden",
+                        "reason": "высокое содержание фруктанов"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "фундук": {
+                "category": "орехи",
+                "subcategory": "орехи",
+                "base_tokens": ["фундук", "фундук жареный", "фундук сырой", "лесной орех"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": false,
+                    "typical_protein": 15.0,
+                    "typical_fat": 61.0,
+                    "typical_carbs": 9.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": {
+                        "verdict": "allowed",
+                        "condition": "до 30г",
+                        "reason": "низкое содержание углеводов"
+                    },
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "до 10 шт",
+                        "reason": "низкое содержание FODMAP"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "бразильский орех": {
+                "category": "орехи",
+                "subcategory": "орехи",
+                "base_tokens": ["бразильский орех", "бразильские орехи", "орех бразильский"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": false,
+                    "typical_protein": 14.0,
+                    "typical_fat": 66.0,
+                    "typical_carbs": 5.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "до 5 шт",
+                        "reason": "низкое содержание FODMAP"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "пекан": {
+                "category": "орехи",
+                "subcategory": "орехи",
+                "base_tokens": ["пекан", "орех пекан", "пеканы"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": false,
+                    "typical_protein": 9.0,
+                    "typical_fat": 72.0,
+                    "typical_carbs": 4.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "до 10 половинок",
+                        "reason": "низкое содержание FODMAP"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+             "семена льна": {
+                "category": "орехи",
+                "subcategory": "семена",
+                "base_tokens": ["семена льна", "льняное семя", "лен семена", "семя льна молотое"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": false,
+                    "typical_protein": 18.0,
+                    "typical_fat": 42.0,
+                    "typical_carbs": 2.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "до 2 ст.л.",
+                        "reason": "низкое содержание FODMAP"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "семена чиа": {
+                "category": "орехи",
+                "subcategory": "семена",
+                "base_tokens": ["чиа", "семена чиа", "семя чиа"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": false,
+                    "typical_protein": 17.0,
+                    "typical_fat": 31.0,
+                    "typical_carbs": 5.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": {
+                        "verdict": "allowed",
+                        "condition": "до 2 ст.л.",
+                        "reason": "низкое содержание FODMAP"
+                    },
+                    "lactose_free": "allowed"
+                }
+            }
+        },
+        "заморозка": {
+             "котлеты рыбные": {
+                "category": "заморозка",
+                "subcategory": "полуфабрикаты",
+                "base_tokens": ["котлеты рыбные", "рыбные котлеты", "рыбные палочки", "рыбные биточки"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": true,
+                    "hidden_sugar": true,
+                    "typical_protein": 12.0,
+                    "typical_fat": 8.0,
+                    "typical_carbs": 15.0
+                },
+                "diet_rules": {
+                    "no_sugar": {
+                        "verdict": "warning",
+                        "reason": "часто содержат сахар в панировке"
+                    },
+                    "keto": {
+                        "verdict": "warning",
+                        "reason": "содержат углеводы из панировки"
+                    },
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "проверить состав на пшеницу/лук/чеснок",
+                        "reason": "панировка содержит пшеницу, возможны FODMAP-специи"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+             "блины замороженные": {
+                "category": "заморозка",
+                "subcategory": "полуфабрикаты",
+                "base_tokens": ["блины", "блины замороженные", "блинчики", "блины с начинкой"],
+                "attributes": {
+                    "contains_lactose": true,
+                    "contains_gluten": true,
+                    "hidden_sugar": true,
+                    "typical_protein": 6.0,
+                    "typical_fat": 8.0,
+                    "typical_carbs": 35.0
+                },
+                "diet_rules": {
+                    "no_sugar": {
+                        "verdict": "warning",
+                        "reason": "содержат сахар в тесте и начинке"
+                    },
+                    "keto": "forbidden",
+                    "low_fodmap": {
+                        "verdict": "forbidden",
+                        "reason": "содержит пшеницу и лактозу"
+                    },
+                    "lactose_free": "forbidden"
+                }
+            },
+             "наггетсы": {
+                "category": "заморозка",
+                "subcategory": "полуфабрикаты",
+                "base_tokens": ["наггетсы", "куриные наггетсы", "наггетсы замороженные"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": true,
+                    "hidden_sugar": true,
+                    "typical_protein": 14.0,
+                    "typical_fat": 10.0,
+                    "typical_carbs": 18.0
+                },
+                "diet_rules": {
+                    "no_sugar": {
+                        "verdict": "warning",
+                        "reason": "часто содержат сахар в панировке"
+                    },
+                    "keto": {
+                        "verdict": "warning",
+                        "reason": "содержат углеводы из панировки"
+                    },
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "проверить состав на пшеницу/лук/чеснок",
+                        "reason": "панировка содержит пшеницу, возможны FODMAP-специи"
+                    },
                     "lactose_free": "allowed"
                 }
             }
