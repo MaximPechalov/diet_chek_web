@@ -1432,6 +1432,159 @@
                     "lactose_free": "allowed"
                 }
             },
+            "свинина шейка": {
+                "category": "мясо",
+                "subcategory": "свинина",
+                "base_tokens": ["свинина шейка", "шейка свиная", "свиная шейка"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 14.0,
+                    "typical_fat": 28.0,
+                    "typical_carbs": 0.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            },
+            "свинина карбонат": {
+                "category": "мясо",
+                "subcategory": "свинина",
+                "base_tokens": ["карбонат свиной", "свиной карбонат", "свинина для запекания"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 16.0,
+                    "typical_fat": 22.0,
+                    "typical_carbs": 0.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            },
+            "свинина вырезка": {
+                "category": "мясо",
+                "subcategory": "свинина",
+                "base_tokens": ["вырезка свиная", "свиная вырезка", "свинина постная"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 20.0,
+                    "typical_fat": 7.0,
+                    "typical_carbs": 0.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            },
+            "говядина вырезка": {
+                "category": "мясо",
+                "subcategory": "красное мясо",
+                "base_tokens": ["вырезка говяжья", "говяжья вырезка", "стейк", "стейк говяжий", "говядина стейк"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 22.0,
+                    "typical_fat": 8.0,
+                    "typical_carbs": 0.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            },
+            "говядина тушеная": {
+                "category": "мясо",
+                "subcategory": "красное мясо",
+                "base_tokens": ["говядина тушеная", "тушенка говяжья", "консервы говядина"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": false,
+                    "typical_protein": 17.0,
+                    "typical_fat": 15.0,
+                    "typical_carbs": 0.5
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "проверить состав на лук/чеснок",
+                        "reason": "в консервах часто есть специи"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "куриные ножки": {
+                "category": "птица",
+                "subcategory": "курица",
+                "base_tokens": ["ножки куриные", "куриные ножки", "окорочка куриные", "голень куриная"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 17.0,
+                    "typical_fat": 11.0,
+                    "typical_carbs": 0.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            },
+            "куриная печень": {
+                "category": "птица",
+                "subcategory": "субпродукты",
+                "base_tokens": ["печень куриная", "куриная печень", "печенка куриная"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 20.0,
+                    "typical_fat": 5.0,
+                    "typical_carbs": 1.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": {
+                        "verdict": "allowed",
+                        "condition": "в умеренных количествах",
+                        "reason": "содержит немного углеводов"
+                    },
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            },
+             "куриные сердечки": {
+                "category": "птица",
+                "subcategory": "субпродукты",
+                "base_tokens": ["сердечки куриные", "куриные сердечки", "сердце куриное"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 16.0,
+                    "typical_fat": 10.0,
+                    "typical_carbs": 0.8
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            },
             "говядина фарш": {
                 "category": "мясо",
                 "subcategory": "красное мясо",
@@ -1825,6 +1978,119 @@
                     "lactose_free": "forbidden"
                 }
             },
+            "колбаса сервелат": {
+                "category": "колбасы",
+                "subcategory": "полукопченая",
+                "base_tokens": ["сервелат", "колбаса сервелат", "сервелат зернистый", "сервелат швейцарский"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": true,
+                    "typical_protein": 16.0,
+                    "typical_fat": 35.0,
+                    "typical_carbs": 1.0
+                },
+                "diet_rules": {
+                    "no_sugar": {
+                        "verdict": "warning",
+                        "reason": "возможно содержание сахара"
+                    },
+                    "keto": "allowed",
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "проверить на чесночный порошок",
+                        "reason": "часто содержит чеснок"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+             "колбаса салями": {
+                "category": "колбасы",
+                "subcategory": "сырокопченая",
+                "base_tokens": ["салями", "колбаса салями", "салями миланская", "салями венгерская"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": false,
+                    "typical_protein": 22.0,
+                    "typical_fat": 40.0,
+                    "typical_carbs": 0.5
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "проверить на чеснок/специи",
+                        "reason": "может содержать чеснок"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+             "колбаски охотничьи": {
+                "category": "колбасы",
+                "subcategory": "полукопченая",
+                "base_tokens": ["охотничьи колбаски", "колбаски охотничьи", "колбаски копченые"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": true,
+                    "typical_protein": 18.0,
+                    "typical_fat": 38.0,
+                    "typical_carbs": 1.5
+                },
+                "diet_rules": {
+                    "no_sugar": {
+                        "verdict": "warning",
+                        "reason": "возможно содержание сахара"
+                    },
+                    "keto": "allowed",
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "проверить на чесночный порошок",
+                        "reason": "часто содержат чеснок"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "грудинка копченая": {
+                "category": "колбасы",
+                "subcategory": "деликатесы",
+                "base_tokens": ["грудинка", "грудинка копченая", "грудинка свиная", "грудинка варено-копченая"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": false,
+                    "typical_protein": 10.0,
+                    "typical_fat": 50.0,
+                    "typical_carbs": 0.5
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            },
+             "балык": {
+                "category": "колбасы",
+                "subcategory": "деликатесы",
+                "base_tokens": ["балык", "балык свиной", "балык сырокопченый", "мясо сушеное"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": false,
+                    "typical_protein": 20.0,
+                    "typical_fat": 15.0,
+                    "typical_carbs": 0.5
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            },
              "колбаса вареная прочая": {
                 "category": "колбасы",
                 "subcategory": "вареная",
@@ -2096,6 +2362,184 @@
                         "condition": "проверить состав рассола на сахар",
                         "reason": "в рассол могут добавлять сахар"
                     },
+                    "keto": "allowed",
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            },
+            "скумбрия копченая": {
+                "category": "рыба",
+                "subcategory": "жирная рыба",
+                "base_tokens": ["скумбрия копченая", "скумбрия холодного копчения", "скумбрия горячего копчения"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 18.0,
+                    "typical_fat": 14.0,
+                    "typical_carbs": 0.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            },
+            "мойва": {
+                "category": "рыба",
+                "subcategory": "мелкая рыба",
+                "base_tokens": ["мойва", "мойва свежая", "мойва замороженная", "мойва копченая"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 13.0,
+                    "typical_fat": 11.0,
+                    "typical_carbs": 0.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            },
+            "килька": {
+                "category": "рыба",
+                "subcategory": "консервы",
+                "base_tokens": ["килька", "килька в томате", "килька пряного посола", "консервы килька"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": true,
+                    "typical_protein": 14.0,
+                    "typical_fat": 9.0,
+                    "typical_carbs": 3.0
+                },
+                "diet_rules": {
+                    "no_sugar": {
+                        "verdict": "warning",
+                        "condition": "проверить состав соуса на сахар",
+                        "reason": "в томатном соусе часто есть сахар"
+                    },
+                    "keto": {
+                        "verdict": "warning",
+                        "reason": "содержит углеводы из соуса"
+                    },
+                    "low_fodmap": {
+                        "verdict": "warning",
+                        "condition": "проверить состав соуса",
+                        "reason": "возможны FODMAP-компоненты в соусе"
+                    },
+                    "lactose_free": "allowed"
+                }
+            },
+            "сардина": {
+                "category": "рыба",
+                "subcategory": "консервы",
+                "base_tokens": ["сардина", "сардины", "сардины в масле", "консервы сардина"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": false,
+                    "typical_protein": 19.0,
+                    "typical_fat": 17.0,
+                    "typical_carbs": 0.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            },
+            "сайра": {
+                "category": "рыба",
+                "subcategory": "консервы",
+                "base_tokens": ["сайра", "сайра в масле", "сайра консервированная", "консервы сайра"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": false,
+                    "typical_protein": 18.0,
+                    "typical_fat": 23.0,
+                    "typical_carbs": 0.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            },
+            "икра красная": {
+                "category": "рыба",
+                "subcategory": "икра",
+                "base_tokens": ["икра красная", "икра лососевая", "икра горбуши", "икра кеты"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": false,
+                    "typical_protein": 25.0,
+                    "typical_fat": 15.0,
+                    "typical_carbs": 1.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            },
+             "икра минтая": {
+                "category": "рыба",
+                "subcategory": "икра",
+                "base_tokens": ["икра минтая", "икра минтая соленая", "икра пробойная"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "hidden_sugar": false,
+                    "typical_protein": 28.0,
+                    "typical_fat": 2.0,
+                    "typical_carbs": 1.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            },
+            "краб": {
+                "category": "морепродукты",
+                "subcategory": "ракообразные",
+                "base_tokens": ["краб", "крабовое мясо", "краб вареный", "краб замороженный"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 18.0,
+                    "typical_fat": 1.0,
+                    "typical_carbs": 0.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
+                    "keto": "allowed",
+                    "low_fodmap": "allowed",
+                    "lactose_free": "allowed"
+                }
+            },
+            "осьминог": {
+                "category": "морепродукты",
+                "subcategory": "моллюски",
+                "base_tokens": ["осьминог", "осьминог замороженный", "осьминог вареный", "мини осьминоги"],
+                "attributes": {
+                    "contains_lactose": false,
+                    "contains_gluten": false,
+                    "typical_protein": 15.0,
+                    "typical_fat": 1.0,
+                    "typical_carbs": 2.0
+                },
+                "diet_rules": {
+                    "no_sugar": "allowed",
                     "keto": "allowed",
                     "low_fodmap": "allowed",
                     "lactose_free": "allowed"
