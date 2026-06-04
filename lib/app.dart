@@ -4,23 +4,25 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'features/scanner/scanner_screen.dart';
 import 'features/scanner/composition_scanner_screen.dart';
 import 'features/history/history_screen.dart';
+import 'features/statistics/statistics_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'core/constants/app_colors.dart';
 
-final GlobalKey<DietChekAppState> appKey = GlobalKey<DietChekAppState>();
+final GlobalKey<DietioAppState> appKey = GlobalKey<DietioAppState>();
 
-class DietChekApp extends StatefulWidget {
-  DietChekApp() : super(key: appKey);
+class DietioApp extends StatefulWidget {
+  DietioApp() : super(key: appKey);
 
   @override
-  State<DietChekApp> createState() => DietChekAppState();
+  State<DietioApp> createState() => DietioAppState();
 }
 
-class DietChekAppState extends State<DietChekApp> {
+class DietioAppState extends State<DietioApp> {
   ThemeMode _themeMode = ThemeMode.system;
   double _accentHue = 120;
   double _backgroundHue = 210;
   double _backgroundSaturation = 0.05;
+  double _backgroundLightness = 0.95;
 
   @override
   void initState() {
@@ -35,6 +37,7 @@ class DietChekAppState extends State<DietChekApp> {
       _accentHue = prefs.getDouble('accent_hue') ?? 120;
       _backgroundHue = prefs.getDouble('background_hue') ?? 210;
       _backgroundSaturation = prefs.getDouble('background_saturation') ?? 0.05;
+      _backgroundLightness = prefs.getDouble('background_lightness') ?? 0.95;
       setState(() {
         switch (themeStr) {
           case 'light':
@@ -58,10 +61,11 @@ class DietChekAppState extends State<DietChekApp> {
     setState(() => _accentHue = hue);
   }
 
-  void setBackgroundColor(double hue, double saturation) {
+  void setBackgroundColor(double hue, double saturation, double lightness) {
     setState(() {
       _backgroundHue = hue;
       _backgroundSaturation = saturation;
+      _backgroundLightness = lightness;
     });
   }
 
@@ -71,7 +75,7 @@ class DietChekAppState extends State<DietChekApp> {
     if (_themeMode == ThemeMode.dark) {
       return const Color(0xFF121212);
     }
-    return HSLColor.fromAHSL(1.0, _backgroundHue, _backgroundSaturation, 0.95).toColor();
+    return HSLColor.fromAHSL(1.0, _backgroundHue, _backgroundSaturation, _backgroundLightness).toColor();
   }
 
   @override
@@ -79,7 +83,7 @@ class DietChekAppState extends State<DietChekApp> {
     final Color accent = _accentColor;
 
     return MaterialApp(
-      title: 'DietChek',
+      title: 'Dietio',
       debugShowCheckedModeBanner: false,
       themeMode: _themeMode,
       theme: ThemeData(
@@ -116,21 +120,42 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
+  final PageController _pageController = PageController();
 
   final List<Widget> _screens = const [
     ScannerScreen(),
     CompositionScannerScreen(),
     HistoryScreen(),
+    StatisticsScreen(),
     SettingsScreen(),
   ];
 
   @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_currentIndex],
+      body: PageView(
+        controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(),
+        children: _screens,
+        onPageChanged: (int index) {
+          setState(() => _currentIndex = index);
+        },
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
+        animationDuration: const Duration(milliseconds: 400),
         onDestinationSelected: (int index) {
+          _pageController.animateToPage(
+            index,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
           setState(() => _currentIndex = index);
         },
         destinations: const [
@@ -148,6 +173,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             icon: Icon(Icons.history_outlined),
             selectedIcon: Icon(Icons.history),
             label: 'История',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.bar_chart_outlined),
+            selectedIcon: Icon(Icons.bar_chart),
+            label: 'Статистика',
           ),
           NavigationDestination(
             icon: Icon(Icons.settings_outlined),

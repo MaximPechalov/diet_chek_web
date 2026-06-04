@@ -337,8 +337,64 @@ class _ProductList extends StatelessWidget {
       itemCount: receipt.items.length,
       itemBuilder: (BuildContext context, int index) {
         final ScannedItem item = receipt.items[index];
-        return _ProductTile(item: item);
+        return _AnimatedProductTile(
+          item: item,
+          index: index,
+        );
       },
+    );
+  }
+}
+
+class _AnimatedProductTile extends StatefulWidget {
+  final ScannedItem item;
+  final int index;
+
+  const _AnimatedProductTile({required this.item, required this.index});
+
+  @override
+  State<_AnimatedProductTile> createState() => _AnimatedProductTileState();
+}
+
+class _AnimatedProductTileState extends State<_AnimatedProductTile> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0.3, 0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: _ProductTile(item: widget.item),
+      ),
     );
   }
 }
@@ -551,9 +607,22 @@ class _DietBadge extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: _badgeColor(rule).withOpacity(0.4)),
         ),
-        child: Text(
-          _badgeText,
-          style: TextStyle(fontSize: 11, color: _badgeColor(rule), fontWeight: FontWeight.w500),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 8, height: 8,
+              decoration: BoxDecoration(
+                color: _badgeColor(rule),
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              _badgeText,
+              style: TextStyle(fontSize: 11, color: _badgeColor(rule), fontWeight: FontWeight.w500),
+            ),
+          ],
         ),
       ),
     );

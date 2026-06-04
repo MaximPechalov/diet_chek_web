@@ -192,8 +192,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
-// ============ ЭКРАН КАСТОМИЗАЦИИ ============
-
 class CustomizationScreen extends StatefulWidget {
   const CustomizationScreen({super.key});
 
@@ -208,6 +206,7 @@ class _CustomizationScreenState extends State<CustomizationScreen> {
   double _accentHue = 120;
   double _backgroundHue = 210;
   double _backgroundSaturation = 0.05;
+  double _backgroundLightness = 0.95;
 
   @override
   void initState() {
@@ -221,6 +220,7 @@ class _CustomizationScreenState extends State<CustomizationScreen> {
       _accentHue = prefs.getDouble(_accentHueKey) ?? 120;
       _backgroundHue = prefs.getDouble(_backgroundHueKey) ?? 210;
       _backgroundSaturation = prefs.getDouble(_backgroundSaturationKey) ?? 0.05;
+      _backgroundLightness = prefs.getDouble('background_lightness') ?? 0.95;
     });
   }
 
@@ -233,6 +233,7 @@ class _CustomizationScreenState extends State<CustomizationScreen> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_backgroundHueKey, _backgroundHue);
     await prefs.setDouble(_backgroundSaturationKey, _backgroundSaturation);
+    await prefs.setDouble('background_lightness', _backgroundLightness);
   }
 
   void _setHue(double hue) {
@@ -241,19 +242,57 @@ class _CustomizationScreenState extends State<CustomizationScreen> {
     appKey.currentState?.setAccentColorFromHue(_accentHue);
   }
 
-  void _setBackground(double hue, double saturation) {
+  void _setBackground(double hue, double saturation, double lightness) {
     setState(() {
       _backgroundHue = hue;
       _backgroundSaturation = saturation;
+      _backgroundLightness = lightness;
     });
     _saveBackground();
-    appKey.currentState?.setBackgroundColor(_backgroundHue, _backgroundSaturation);
+    appKey.currentState?.setBackgroundColor(_backgroundHue, _backgroundSaturation, _backgroundLightness);
   }
 
   Color _currentColor() => HSLColor.fromAHSL(1.0, _accentHue, 0.5, 0.5).toColor();
 
   Color _previewBackgroundColor() {
-    return HSLColor.fromAHSL(1.0, _backgroundHue, _backgroundSaturation, 0.95).toColor();
+    return HSLColor.fromAHSL(1.0, _backgroundHue, _backgroundSaturation, _backgroundLightness).toColor();
+  }
+
+  void _showAboutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Container(
+                width: 40, height: 40,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.receipt_long, color: Colors.white, size: 22),
+              ),
+              const SizedBox(width: 12),
+              const Text('Dietio'),
+            ],
+          ),
+          content: const Text(
+            'Персональный диетический аудитор чеков.\n\n'
+            'Сканируйте чеки и составы продуктов. Dietio анализирует каждый товар '
+            'по выбранным диетам и показывает, что можно есть, а что нет.\n\n'
+            'Версия 1.0.0\n'
+            '© 2026 Dietio',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Закрыть'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -305,7 +344,7 @@ class _CustomizationScreenState extends State<CustomizationScreen> {
 
           Text('Цвет фона', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
           const SizedBox(height: 4),
-          _HueSlider(value: _backgroundHue, onChanged: (v) => _setBackground(v, _backgroundSaturation)),
+          _HueSlider(value: _backgroundHue, onChanged: (v) => _setBackground(v, _backgroundSaturation, _backgroundLightness)),
           const SizedBox(height: 4),
           Center(child: Text('Оттенок: ${_backgroundHue.toInt()}°', style: TextStyle(fontSize: 11, color: Colors.grey[500]))),
 
@@ -319,11 +358,11 @@ class _CustomizationScreenState extends State<CustomizationScreen> {
                 child: Slider(
                   value: _backgroundSaturation,
                   min: 0,
-                  max: 0.8,
+                  max: 0.6,
                   onChanged: (v) => setState(() => _backgroundSaturation = v),
                   onChangeEnd: (v) {
                     _saveBackground();
-                    appKey.currentState?.setBackgroundColor(_backgroundHue, _backgroundSaturation);
+                    appKey.currentState?.setBackgroundColor(_backgroundHue, _backgroundSaturation, _backgroundLightness);
                   },
                   activeColor: _currentColor(),
                 ),
@@ -332,6 +371,30 @@ class _CustomizationScreenState extends State<CustomizationScreen> {
             ],
           ),
           Center(child: Text('${(_backgroundSaturation * 100).toInt()}%', style: TextStyle(fontSize: 11, color: Colors.grey[500]))),
+
+          const SizedBox(height: 16),
+          Text('Яркость фона', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              const Icon(Icons.brightness_low, size: 16, color: Colors.grey),
+              Expanded(
+                child: Slider(
+                  value: _backgroundLightness,
+                  min: 0.80,
+                  max: 1.00,
+                  onChanged: (v) => setState(() => _backgroundLightness = v),
+                  onChangeEnd: (v) {
+                    _saveBackground();
+                    appKey.currentState?.setBackgroundColor(_backgroundHue, _backgroundSaturation, _backgroundLightness);
+                  },
+                  activeColor: _currentColor(),
+                ),
+              ),
+              const Icon(Icons.brightness_high, size: 16, color: Colors.grey),
+            ],
+          ),
+          Center(child: Text('${(_backgroundLightness * 100).toInt()}%', style: TextStyle(fontSize: 11, color: Colors.grey[500]))),
 
           const SizedBox(height: 40),
           _buildSectionHeader('Сброс', null),
@@ -343,7 +406,7 @@ class _CustomizationScreenState extends State<CustomizationScreen> {
             subtitle: const Text('Вернуть зелёный цвет по умолчанию'),
             onTap: () {
               _setHue(120);
-              _setBackground(210, 0.05);
+              _setBackground(210, 0.05, 0.95);
             },
           ),
           ListTile(
@@ -355,13 +418,15 @@ class _CustomizationScreenState extends State<CustomizationScreen> {
               await prefs.setDouble(_accentHueKey, 120);
               await prefs.setDouble(_backgroundHueKey, 210);
               await prefs.setDouble(_backgroundSaturationKey, 0.05);
+              await prefs.setDouble('background_lightness', 0.95);
               setState(() {
                 _accentHue = 120;
                 _backgroundHue = 210;
                 _backgroundSaturation = 0.05;
+                _backgroundLightness = 0.95;
               });
               appKey.currentState?.setAccentColorFromHue(120);
-              appKey.currentState?.setBackgroundColor(210, 0.05);
+              appKey.currentState?.setBackgroundColor(210, 0.05, 0.95);
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Настройки сброшены.')),
@@ -376,13 +441,14 @@ class _CustomizationScreenState extends State<CustomizationScreen> {
 
           ListTile(
             leading: const Icon(Icons.info_outline),
-            title: const Text('DietChek'),
+            title: const Text('О Dietio'),
             subtitle: const Text('Версия 1.0.0'),
+            onTap: () => _showAboutDialog(context),
           ),
           ListTile(
             leading: const Icon(Icons.storage),
             title: const Text('База продуктов'),
-            subtitle: const Text('Версия 1.0 от 24.05.2026'),
+            subtitle: const Text('Более 340 продуктов по 4 диетам'),
           ),
         ],
       ),
@@ -400,8 +466,6 @@ class _CustomizationScreenState extends State<CustomizationScreen> {
   }
 }
 
-// ============ ВИДЖЕТЫ ============
-
 class _DietSwitchTile extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -417,8 +481,34 @@ class _DietSwitchTile extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: SwitchListTile(
-        secondary: Container(width: 40, height: 40, decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(10)), child: Icon(icon, color: color, size: 22)),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+        secondary: Container(
+          width: 40, height: 40,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: color, size: 22),
+        ),
+        title: Row(
+          children: [
+            Expanded(child: Text(title, style: const TextStyle(fontWeight: FontWeight.w600))),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: value ? color.withOpacity(0.15) : Colors.grey.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                value ? 'Активна' : 'Выкл',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: value ? color : Colors.grey,
+                ),
+              ),
+            ),
+          ],
+        ),
         subtitle: Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
         value: value,
         onChanged: onChanged,

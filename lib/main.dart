@@ -18,6 +18,10 @@ void main() async {
     DeviceOrientation.portraitUp,
   ]);
 
+  // Показываем splash screen
+  runApp(const SplashScreen());
+
+  // Загружаем все данные в фоне
   try {
     await LocalDatabase.initialize();
   } catch (e) {
@@ -38,6 +42,7 @@ void main() async {
 
   final bool onboardingComplete = await _isOnboardingComplete();
 
+  // Заменяем splash на основное приложение
   runApp(
     MultiProvider(
       providers: [
@@ -46,7 +51,7 @@ void main() async {
         Provider<OcrService>.value(value: ocrService),
       ],
       child: onboardingComplete
-          ? DietChekApp()
+          ? DietioApp()
           : MaterialApp(
               debugShowCheckedModeBanner: false,
               home: OnboardingScreen(
@@ -58,7 +63,7 @@ void main() async {
                         Provider<ScanReceiptUseCase>.value(value: scanReceiptUseCase),
                         Provider<OcrService>.value(value: ocrService),
                       ],
-                      child: DietChekApp(),
+                      child: DietioApp(),
                     ),
                   );
                 },
@@ -74,5 +79,70 @@ Future<bool> _isOnboardingComplete() async {
     return prefs.getBool('onboarding_complete') ?? false;
   } catch (e) {
     return false;
+  }
+}
+
+// Splash Screen
+class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Определяем тему системы
+    final bool isDark = WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark;
+
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFF2E7D32),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[800] : Colors.white,
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: Icon(
+                  Icons.receipt_long,
+                  size: 60,
+                  color: isDark ? Colors.white : const Color(0xFF2E7D32),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Dietio',
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.white,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 2,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Персональный диетический аудитор',
+                style: TextStyle(
+                  color: isDark ? Colors.white70 : Colors.white70,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 48),
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: isDark ? Colors.white : Colors.white,
+                  strokeWidth: 2,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

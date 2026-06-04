@@ -1,17 +1,77 @@
-# diet_chek
+# Dietio — Персональный диетический аудитор чеков
 
-A new Flutter project.
+Сканируйте чеки из магазинов и составы продуктов. Dietio анализирует каждый товар по выбранным диетам и показывает, что можно есть, а что нет.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## Возможности
 
-A few resources to get you started if this is your first Flutter project:
+- 📄 **Сканер чеков** — фотографируйте чек и получайте мгновенный анализ всех товаров
+- 🔍 **Сканер состава** — сканируйте состав на упаковке и узнавайте запрещённые ингредиенты
+- 🥗 **4 диеты** — Без сахара, Кето, Low-FODMAP, Без лактозы
+- 📊 **История** — все чеки сохраняются с возможностью переключения диет
+- 🎨 **Кастомизация** — тёмная/светлая тема, HSL-палитра цветов, настройка фона
+- 📱 **PWA** — работает офлайн, можно установить на телефон
+- 🌐 **Open Food Facts** — онлайн-поиск составов продуктов
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Технологии
+
+- **Flutter** — кросс-платформенность (Android, iOS, Web)
+- **Provider** — управление состоянием
+- **SharedPreferences** — локальное хранение данных
+- **Google ML Kit** — OCR для распознавания чеков
+- **Open Food Facts API** — онлайн-поиск продуктов
+
+---
+
+## Быстрый старт
+
+### Веб-версия
+
+```bash
+git clone <репозиторий>
+cd diet_chek_web
+flutter create --platforms=web .
+flutter pub get
+flutter run -d web-server --web-port 8080 --web-hostname 0.0.0.0
+Android
+bash
+flutter run -d android
+iOS
+bash
+flutter run -d ios
+Структура проекта
+text
+lib/
+├── app.dart                        # MaterialApp, темы, навигация
+├── main.dart                       # Точка входа
+├── core/constants/                 # Цвета, строки, размеры
+├── data/
+│   ├── datasources/                # JSON-база продуктов
+│   ├── models/                     # Product, Receipt, ScannedItem, DietRule
+│   └── repositories/               # ProductRepository
+├── domain/usecases/                # ScanReceiptUseCase
+├── features/
+│   ├── scanner/                    # Сканер чека и состава
+│   ├── history/                    # История сканирований
+│   ├── settings/                   # Настройки и кастомизация
+│   └── onboarding/                 # Онбординг
+└── services/                       # OCR, анализатор ингредиентов
+База продуктов
+Более 340 продуктов с правилами для 4 диет:
+
+Категория	Позиций
+Молочные продукты и яйца	~50
+Мясо, птица, колбасы, рыба	~75
+Овощи, зелень, грибы	~50
+Фрукты, ягоды, сухофрукты	~50
+Бакалея, крупы, хлеб, выпечка	~60
+Сладости, снеки	~20
+Напитки	~20
+Соусы, приправы, орехи, заморозка	~30
+Лицензия
+MIT. Используйте, модифицируйте, распространяйте свободно.
+
+Dietio — знайте, что вы едите.

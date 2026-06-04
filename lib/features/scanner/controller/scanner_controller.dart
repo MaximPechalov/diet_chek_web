@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../domain/usecases/scan_receipt.dart';
 import '../../../data/models/receipt.dart';
 import '../../../services/ocr_service.dart';
-import '../../../services/open_food_facts_service.dart';
 import '../../../data/models/online_product.dart';
 import '../../../data/repositories/product_repository.dart';
 import '../../../data/models/diet_rule.dart';
@@ -22,7 +21,6 @@ enum ScanDataSource {
 class ScannerController extends ChangeNotifier {
   final ScanReceiptUseCase _scanReceiptUseCase;
   final OcrService _ocrService;
-  final OpenFoodFactsService _openFoodFactsService;
 
   bool _isProcessing = false;
   String? _errorMessage;
@@ -36,11 +34,8 @@ class ScannerController extends ChangeNotifier {
   ScannerController({
     required ScanReceiptUseCase scanReceiptUseCase,
     required OcrService ocrService,
-    required dynamic receiptRepository,
-    required OpenFoodFactsService openFoodFactsService,
   })  : _scanReceiptUseCase = scanReceiptUseCase,
-        _ocrService = ocrService,
-        _openFoodFactsService = openFoodFactsService {
+        _ocrService = ocrService {
     _loadActiveDiets();
   }
 

@@ -1,5 +1,5 @@
-name: diet_chek
-description: Персональный диетический аудитор чеков.
+name: dietio
+description: Персональный диетический аудитор чеков — Dietio.
 publish_to: 'none'
 version: 1.0.0+1
 

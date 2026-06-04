@@ -11,7 +11,7 @@ class OnboardingScreen extends StatefulWidget {
   State<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends State<OnboardingScreen> with TickerProviderStateMixin {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
@@ -20,30 +20,48 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   bool _lowFodmap = false;
   bool _lactoseFree = false;
 
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
+
   final List<_OnboardingPage> _pages = [
     _OnboardingPage(
       icon: Icons.receipt_long,
-      title: 'Сканируйте чеки',
-      description: 'Фотографируйте чек из магазина\nи получайте мгновенный анализ продуктов\nпо вашим диетам',
+      title: 'Добро пожаловать в Dietio',
+      description: 'Ваш персональный диетический аудитор.\nСканируйте чеки и составы продуктов\nи получайте мгновенный анализ.',
       color: AppColors.primary,
     ),
     _OnboardingPage(
       icon: Icons.menu_book,
       title: 'Анализируйте состав',
-      description: 'Сканируйте состав на упаковке\nи узнавайте, какие ингредиенты\nвам не подходят',
+      description: 'Сканируйте состав на упаковке\nи узнавайте, какие ингредиенты\nвам не подходят.',
       color: const Color(0xFFFF7043),
     ),
     _OnboardingPage(
       icon: Icons.tune,
       title: 'Выберите диеты',
-      description: 'Настройте диеты, которые вы соблюдаете,\nи приложение будет проверять\nпродукты автоматически',
+      description: 'Настройте диеты, которые вы соблюдаете,\nи Dietio будет проверять\nпродукты автоматически.',
       color: const Color(0xFF42A5F5),
       showDietSelection: true,
     ),
   ];
 
+  bool get _hasSelectedDiets => _noSugar || _keto || _lowFodmap || _lactoseFree;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    )..repeat(reverse: true);
+    _pulseAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+  }
+
   @override
   void dispose() {
+    _pulseController.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -113,29 +131,52 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: SizedBox(
                 width: double.infinity,
                 height: 56,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_currentPage < _pages.length - 1) {
-                      _pageController.nextPage(
-                        duration: const Duration(milliseconds: 300),
+                child: _currentPage < _pages.length - 1
+                    ? ElevatedButton(
+                        onPressed: () {
+                          _pageController.nextPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Далее', style: TextStyle(fontSize: 18)),
+                      )
+                    : AnimatedContainer(
+                        duration: const Duration(milliseconds: 400),
                         curve: Curves.easeInOut,
-                      );
-                    } else {
-                      _finishOnboarding();
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    _currentPage < _pages.length - 1 ? 'Далее' : 'Начать',
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: _hasSelectedDiets ? AppColors.primary : Colors.grey[400],
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: _finishOnboarding,
+                            child: Center(
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 300),
+                                child: Text(
+                                  _hasSelectedDiets ? 'Начать' : 'Настрою позже',
+                                  key: ValueKey<String>(_hasSelectedDiets ? 'start' : 'later'),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
               ),
             ),
           ],
@@ -150,34 +191,35 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              color: page.color.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(page.icon, size: 60, color: page.color),
+          AnimatedBuilder(
+            animation: _pulseAnimation,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: _pulseAnimation.value,
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: page.color.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(page.icon, size: 60, color: page.color),
+                ),
+              );
+            },
           ),
           const SizedBox(height: 40),
 
           Text(
             page.title,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
 
           Text(
             page.description,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-              height: 1.5,
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey[600], height: 1.5),
             textAlign: TextAlign.center,
           ),
 
@@ -211,6 +253,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               value: _lactoseFree,
               onChanged: (bool value) => setState(() => _lactoseFree = value),
             ),
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 400),
+              opacity: _hasSelectedDiets ? 0.0 : 1.0,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 400),
+                height: _hasSelectedDiets ? 0.0 : 30.0,
+                alignment: Alignment.center,
+                child: Text(
+                  'Вы сможете изменить диеты позже в настройках',
+                  style: TextStyle(fontSize: 12, color: Colors.grey[500], fontStyle: FontStyle.italic),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
           ],
         ],
       ),
@@ -229,8 +285,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: Row(
         children: [
           Container(
-            width: 32,
-            height: 32,
+            width: 32, height: 32,
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
@@ -238,14 +293,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             child: Icon(icon, size: 18, color: color),
           ),
           const SizedBox(width: 12),
-          Expanded(
-            child: Text(label, style: const TextStyle(fontSize: 14)),
-          ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeColor: color,
-          ),
+          Expanded(child: Text(label, style: const TextStyle(fontSize: 14))),
+          Switch(value: value, onChanged: onChanged, activeColor: color),
         ],
       ),
     );
