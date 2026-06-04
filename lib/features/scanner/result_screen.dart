@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../../data/models/receipt.dart';
 import '../../data/models/scanned_item.dart';
 import '../../data/models/diet_rule.dart';
+import '../../data/datasources/local_database.dart';
+import '../../data/repositories/product_repository.dart';
 import 'controller/scanner_controller.dart';
 
 class ResultScreen extends StatelessWidget {
@@ -508,39 +510,23 @@ class _ProductSuggestionSheet extends StatelessWidget {
     final List<String> suggestions = [];
 
     for (final String kw in keywords) {
-      switch (kw) {
-        case 'молоко':
-          suggestions.addAll(['молоко 3.2', 'молоко безлактозное']);
-          break;
-        case 'творог':
-          suggestions.addAll(['творог 5', 'творог 9', 'творог обезжиренный', 'творожная масса']);
-          break;
-        case 'сыр':
-          suggestions.addAll(['сыр российский', 'сыр голландский', 'сыр плавленый', 'сыр моцарелла', 'сыр адыгейский']);
-          break;
-        case 'хлеб':
-          suggestions.addAll(['хлеб пшеничный', 'хлеб ржаной', 'хлеб безглютеновый']);
-          break;
-        case 'курица':
-          suggestions.addAll(['курица целая', 'куриное филе', 'куриное бедро', 'куриный фарш']);
-          break;
-        case 'огурец':
-          suggestions.addAll(['огурец свежий', 'огурец соленый']);
-          break;
-        case 'помидор':
-          suggestions.addAll(['помидор свежий', 'помидоры черри']);
-          break;
-        case 'яблоко':
-          suggestions.addAll(['яблоко']);
-          break;
-        case 'банан':
-          suggestions.addAll(['банан']);
-          break;
-        case 'яйцо':
-          suggestions.addAll(['яйцо куриное', 'яйцо перепелиное']);
-          break;
-        default:
-          suggestions.add('$kw (уточнить)');
+      for (final String productKey in LocalDatabase.products.keys) {
+        final Map<String, dynamic> productData = LocalDatabase.products[productKey]!;
+        final List<dynamic> tokens = productData['base_tokens'] as List<dynamic>;
+
+        bool matches = productKey.toLowerCase().contains(kw.toLowerCase());
+        if (!matches) {
+          for (final dynamic token in tokens) {
+            if (token.toString().toLowerCase().contains(kw.toLowerCase())) {
+              matches = true;
+              break;
+            }
+          }
+        }
+
+        if (matches && !suggestions.contains(productKey)) {
+          suggestions.add(productKey);
+        }
       }
     }
 

@@ -1,53 +1,104 @@
-// lib/data/repositories/product_repository.dart
 import '../datasources/local_database.dart';
 import '../models/product.dart';
 
 class ProductRepository {
-  // Кеш уже созданных объектов Product, чтобы не парсить JSON каждый раз
   final Map<String, Product> _cache = {};
 
-  // Поиск продукта по нормализованному ключу из чека
-  // Возвращает Product, если нашли, иначе null
   Product? findByKey(String normalizedKey) {
-    // Сначала проверяем кеш
     if (_cache.containsKey(normalizedKey)) {
       return _cache[normalizedKey];
     }
 
-    // Ищем в сырых данных LocalDatabase
     final Map<String, dynamic>? jsonData = LocalDatabase.findProduct(normalizedKey);
 
     if (jsonData == null) {
       return null;
     }
 
-    // Создаём типизированный объект и кладём в кеш
     final Product product = Product.fromJson(normalizedKey, jsonData);
     _cache[normalizedKey] = product;
     return product;
   }
 
-  // Поиск продукта по строке из чека (перебором токенов)
-  // Принимает уже нормализованную строку (например, "творог простоквашино 9")
-  // Возвращает Product и ключ, по которому нашли совпадение
   Product? findByNormalizedText(String normalizedText) {
-    // Проходим по всем продуктам в базе
+    Product? bestMatch;
+    int bestScore = 0;
+    int bestTokenLength = 0;
+    int bestTokenCount = 0;
+
+    final List<String> numbersInText = _extractNumbers(normalizedText);
+
     for (final String key in LocalDatabase.products.keys) {
       final Map<String, dynamic> jsonData = LocalDatabase.products[key]!;
       final List<dynamic> tokens = jsonData['base_tokens'] as List<dynamic>;
 
-      // Проверяем, содержит ли нормализованная строка хотя бы один токен продукта
+      int totalTokenLength = 0;
+      int matchedTokens = 0;
+      int longestMatch = 0;
+      bool numberMatched = false;
+
       for (final dynamic token in tokens) {
-        if (normalizedText.contains(token.toString().toLowerCase())) {
-          return findByKey(key);
+        final String tokenStr = token.toString().toLowerCase();
+        if (normalizedText.contains(tokenStr)) {
+          matchedTokens++;
+          totalTokenLength += tokenStr.length;
+          if (tokenStr.length > longestMatch) {
+            longestMatch = tokenStr.length;
+          }
+
+          for (final String num in numbersInText) {
+            if (tokenStr.contains(num)) {
+              numberMatched = true;
+              break;
+            }
+          }
+        }
+      }
+
+      if (matchedTokens > 0) {
+        int score = matchedTokens * 1 + longestMatch;
+
+        if (numberMatched && numbersInText.isNotEmpty) {
+          score += 100;
+        }
+
+        if (!numberMatched && numbersInText.isNotEmpty) {
+          bool tokenHasAnyNumber = false;
+          for (final dynamic token in tokens) {
+            if (RegExp(r'\d').hasMatch(token.toString())) {
+              tokenHasAnyNumber = true;
+              break;
+            }
+          }
+          if (tokenHasAnyNumber) {
+            score -= 50;
+          }
+        }
+
+        if (score > bestScore ||
+            (score == bestScore && longestMatch > bestTokenLength) ||
+            (score == bestScore && longestMatch == bestTokenLength && matchedTokens > bestTokenCount)) {
+          bestMatch = findByKey(key);
+          bestScore = score;
+          bestTokenLength = longestMatch;
+          bestTokenCount = matchedTokens;
         }
       }
     }
 
-    return null;
+    return bestMatch;
   }
 
-  // Поиск продуктов по категории
+  List<String> _extractNumbers(String text) {
+    final List<String> numbers = [];
+    final RegExp regex = RegExp(r'(\d+[.,]?\d*)');
+    for (final match in regex.allMatches(text)) {
+      String num = match.group(1)!.replaceAll(',', '.');
+      numbers.add(num);
+    }
+    return numbers;
+  }
+
   List<Product> findByCategory(String category) {
     final List<Product> result = [];
 
@@ -61,7 +112,6 @@ class ProductRepository {
     return result;
   }
 
-  // Получение всех продуктов (для отладки или админки)
   List<Product> getAllProducts() {
     final List<Product> result = [];
 
@@ -75,17 +125,14 @@ class ProductRepository {
     return result;
   }
 
-  // Проверка, загружена ли база
   bool get isDatabaseReady {
     return LocalDatabase.isInitialized;
   }
 
-  // Количество продуктов в базе
   int get productCount {
     return LocalDatabase.products.length;
   }
 
-  // Очистка кеша (если база обновилась)
   void clearCache() {
     _cache.clear();
   }
