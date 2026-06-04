@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:flutter/services.dart' show rootBundle;
 import '../../data/datasources/local_database.dart';
 import '../../data/repositories/product_repository.dart';
 import '../../data/models/receipt.dart';
@@ -7,8 +9,20 @@ import '../../data/models/diet_rule.dart';
 
 class ScanReceiptUseCase {
   final ProductRepository _productRepository;
+  static List<String> _knownBrands = [];
 
   ScanReceiptUseCase(this._productRepository);
+
+  static Future<void> loadBrands() async {
+    try {
+      final String jsonString = await rootBundle.loadString('assets/database/brands.json');
+      final Map<String, dynamic> data = json.decode(jsonString);
+      final List<dynamic> brands = data['brands'] as List<dynamic>;
+      _knownBrands = brands.map((b) => b.toString()).toList();
+    } catch (e) {
+      _knownBrands = [];
+    }
+  }
 
   Receipt execute(List<String> rawLines, List<String> activeDiets) {
     final List<String> mergedLines = _mergeBrokenLines(rawLines);
@@ -28,8 +42,6 @@ class ScanReceiptUseCase {
       if (matchedProduct == null) {
         matchedProduct = _fuzzyFindProduct(normalized);
       }
-
-      print('Итог: $normalized → ${matchedProduct?.key ?? "НЕ НАЙДЕНО"}');
 
       Map<String, DietRule>? dietResults;
       if (matchedProduct != null) {
@@ -94,17 +106,8 @@ class ScanReceiptUseCase {
   String _normalizeLine(String rawLine) {
     String normalized = rawLine;
 
-    // 0. Удаляем известные бренды
-    const List<String> knownBrands = [
-      'ПРОСТОКВАШИНО', 'ДОМИК В ДЕРЕВНЕ', 'ВКУСНОТЕЕВО', 'МИРАТОРГ',
-      'ЧЕРКИЗОВО', 'САВУШКИН', 'ДОБРЫЙ', 'J7', 'РИОБА', 'ЧУДО',
-      'АКТИВИА', 'DANONE', 'ЭРМИГУРТ', 'ФРУТОНЯНЯ', 'АГУША',
-      'ПЕТМОЛ', 'ВАЛИО', 'VALIO', 'PRESIDENT', 'БРЕСТ-ЛИТОВСК',
-      'СЛОБОДА', 'ОЛЕЙНА', 'МАКФА', 'ЩЕБЕКИНСКИЕ', 'BONDUELLE',
-      'БОНДЮЭЛЬ', 'GLOBAL VILLAGE', 'ЯСНО СОЛНЫШКО', 'КУРИНОЕ ЦАРСТВО',
-      'ПЕТЕЛИНКА', 'ИНДИЛАЙТ', 'РУБЛЕВСКИЙ', 'ОСТАНКИНО',
-    ];
-    for (final String brand in knownBrands) {
+    // 0. Удаляем бренды из внешнего файла
+    for (final String brand in _knownBrands) {
       normalized = normalized.replaceAll(brand, '');
     }
 
