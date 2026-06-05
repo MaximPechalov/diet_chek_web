@@ -53,14 +53,8 @@ class DietioAppState extends State<DietioApp> {
     } catch (e) {}
   }
 
-  void setThemeMode(ThemeMode mode) {
-    setState(() => _themeMode = mode);
-  }
-
-  void setAccentColorFromHue(double hue) {
-    setState(() => _accentHue = hue);
-  }
-
+  void setThemeMode(ThemeMode mode) => setState(() => _themeMode = mode);
+  void setAccentColorFromHue(double hue) => setState(() => _accentHue = hue);
   void setBackgroundColor(double hue, double saturation, double lightness) {
     setState(() {
       _backgroundHue = hue;
@@ -69,19 +63,22 @@ class DietioAppState extends State<DietioApp> {
     });
   }
 
-  Color get _accentColor => HSLColor.fromAHSL(1.0, _accentHue, 0.5, 0.5).toColor();
+  Color get _accentColor =>
+      HSLColor.fromAHSL(1.0, _accentHue, 0.5, 0.5).toColor();
 
   Color get _backgroundColor {
-    if (_themeMode == ThemeMode.dark) {
-      return const Color(0xFF121212);
-    }
-    return HSLColor.fromAHSL(1.0, _backgroundHue, _backgroundSaturation, _backgroundLightness).toColor();
+    if (_themeMode == ThemeMode.dark) return const Color(0xFF121212);
+    return HSLColor.fromAHSL(
+      1.0,
+      _backgroundHue,
+      _backgroundSaturation,
+      _backgroundLightness,
+    ).toColor();
   }
 
   @override
   Widget build(BuildContext context) {
     final Color accent = _accentColor;
-
     return MaterialApp(
       title: 'Dietio',
       debugShowCheckedModeBanner: false,
@@ -92,7 +89,15 @@ class DietioAppState extends State<DietioApp> {
           seedColor: accent,
           brightness: Brightness.light,
         ),
-        appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
+        appBarTheme: const AppBarTheme(
+          centerTitle: true,
+          elevation: 0,
+          titleTextStyle: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
         scaffoldBackgroundColor: _backgroundColor,
       ),
       darkTheme: ThemeData(
@@ -101,12 +106,17 @@ class DietioAppState extends State<DietioApp> {
           seedColor: accent,
           brightness: Brightness.dark,
         ),
-        appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
+        appBarTheme: const AppBarTheme(
+          centerTitle: true,
+          elevation: 0,
+          titleTextStyle: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
       ),
       home: const MainNavigationScreen(),
-      routes: {
-        '/home': (context) => const MainNavigationScreen(),
-      },
     );
   }
 }
@@ -138,53 +148,151 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final Color primaryColor = Theme.of(context).colorScheme.primary;
+    final double tabWidth =
+        MediaQuery.of(context).size.width / _screens.length;
+
     return Scaffold(
       body: PageView(
         controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(),
+        physics: const BouncingScrollPhysics(),
+        onPageChanged: (index) {
+          setState(() => _currentIndex = index);
+        },
         children: _screens,
-        onPageChanged: (int index) {
-          setState(() => _currentIndex = index);
-        },
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        animationDuration: const Duration(milliseconds: 400),
-        onDestinationSelected: (int index) {
-          _pageController.animateToPage(
-            index,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
-          setState(() => _currentIndex = index);
+      bottomNavigationBar: Container(
+        height: 70,
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 12,
+              offset: const Offset(0, -3),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            // Анимированный индикатор
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOutCubic,
+              top: 8,
+              left: _getIndicatorPosition(tabWidth),
+              child: Container(
+                width: 28,
+                height: 3,
+                decoration: BoxDecoration(
+                  color: primaryColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            // Табы
+            Row(
+              children: [
+                _buildTab(
+                  index: 0,
+                  icon: Icons.receipt_long_outlined,
+                  activeIcon: Icons.receipt_long,
+                  label: 'Чек',
+                  primaryColor: primaryColor,
+                ),
+                _buildTab(
+                  index: 1,
+                  icon: Icons.menu_book_outlined,
+                  activeIcon: Icons.menu_book,
+                  label: 'Состав',
+                  primaryColor: primaryColor,
+                ),
+                _buildTab(
+                  index: 2,
+                  icon: Icons.history_outlined,
+                  activeIcon: Icons.history,
+                  label: 'История',
+                  primaryColor: primaryColor,
+                ),
+                _buildTab(
+                  index: 3,
+                  icon: Icons.bar_chart_outlined,
+                  activeIcon: Icons.bar_chart,
+                  label: 'Статистика',
+                  primaryColor: primaryColor,
+                ),
+                _buildTab(
+                  index: 4,
+                  icon: Icons.settings_outlined,
+                  activeIcon: Icons.settings,
+                  label: 'Настройки',
+                  primaryColor: primaryColor,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  double _getIndicatorPosition(double tabWidth) {
+    return _currentIndex * tabWidth + (tabWidth - 28) / 2;
+  }
+
+  Widget _buildTab({
+    required int index,
+    required IconData icon,
+    required IconData activeIcon,
+    required String label,
+    required Color primaryColor,
+  }) {
+    final bool isActive = _currentIndex == index;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          if (index != _currentIndex) {
+            setState(() => _currentIndex = index);
+            _pageController.animateToPage(
+              index,
+              duration: const Duration(milliseconds: 350),
+              curve: Curves.easeInOutCubic,
+            );
+          }
         },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.receipt_long_outlined),
-            selectedIcon: Icon(Icons.receipt_long),
-            label: 'Чек',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.menu_book_outlined),
-            selectedIcon: Icon(Icons.menu_book),
-            label: 'Состав',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.history_outlined),
-            selectedIcon: Icon(Icons.history),
-            label: 'История',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.bar_chart_outlined),
-            selectedIcon: Icon(Icons.bar_chart),
-            label: 'Статистика',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings),
-            label: 'Настройки',
-          ),
-        ],
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(height: 14),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              transitionBuilder: (child, animation) {
+                return ScaleTransition(
+                  scale: animation,
+                  child: child,
+                );
+              },
+              child: Icon(
+                isActive ? activeIcon : icon,
+                key: ValueKey('${index}_$isActive'),
+                size: 24,
+                color: isActive ? primaryColor : Colors.grey[400],
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+                color: isActive ? primaryColor : Colors.grey[400],
+                letterSpacing: 0.3,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

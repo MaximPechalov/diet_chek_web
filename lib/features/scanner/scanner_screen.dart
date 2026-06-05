@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/usecases/scan_receipt.dart';
 import '../../services/ocr_service.dart';
 import '../../data/models/receipt.dart';
+import '../../core/constants/app_colors.dart';
 import 'controller/scanner_controller.dart';
 import 'result_screen.dart';
 
@@ -19,9 +20,6 @@ class ScannerScreen extends StatefulWidget {
 class _ScannerScreenState extends State<ScannerScreen> {
   final ImagePicker _imagePicker = ImagePicker();
   bool _showFirstScanHint = false;
-  bool _showTutorial = false;
-  final GlobalKey _scanButtonKey = GlobalKey();
-  final GlobalKey _galleryButtonKey = GlobalKey();
 
   @override
   void initState() {
@@ -33,11 +31,9 @@ class _ScannerScreenState extends State<ScannerScreen> {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final bool hasScanned = prefs.getBool('has_scanned') ?? false;
-      final bool tutorialShown = prefs.getBool('tutorial_shown') ?? false;
       if (mounted) {
         setState(() {
           _showFirstScanHint = !hasScanned;
-          _showTutorial = !tutorialShown && !hasScanned;
         });
       }
     } catch (e) {}
@@ -48,16 +44,10 @@ class _ScannerScreenState extends State<ScannerScreen> {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setBool('has_scanned', true);
       if (mounted) {
-        setState(() => _showFirstScanHint = false);
+        setState(() {
+          _showFirstScanHint = false;
+        });
       }
-    } catch (e) {}
-  }
-
-  Future<void> _dismissTutorial() async {
-    try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('tutorial_shown', true);
-      setState(() => _showTutorial = false);
     } catch (e) {}
   }
 
@@ -70,13 +60,14 @@ class _ScannerScreenState extends State<ScannerScreen> {
       ),
       child: Consumer<ScannerController>(
         builder: (BuildContext context, ScannerController controller, Widget? child) {
-          final Widget mainContent = Scaffold(
+          return Scaffold(
             appBar: AppBar(
               title: const Text('Сканер чека'),
               actions: [
                 IconButton(
                   icon: const Icon(Icons.info_outline),
                   onPressed: () => _showScanTips(context),
+                  tooltip: 'Как сканировать',
                 ),
               ],
             ),
@@ -86,7 +77,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   flex: 2,
                   child: _CameraPreview(
                     controller: controller,
-                    showHint: _showFirstScanHint && !_showTutorial,
+                    showHint: _showFirstScanHint,
                     onDismissHint: _markAsScanned,
                   ),
                 ),
@@ -96,31 +87,14 @@ class _ScannerScreenState extends State<ScannerScreen> {
                 ),
               ],
             ),
-            bottomNavigationBar: _BottomScanButton(
+            bottomNavigationBar: _BottomScanButtons(
               controller: controller,
               onPickFromGallery: () => _pickFromGallery(context),
+              onTestScan: () => _performTestScan(context),
               onSaveToHistory: _saveToHistory,
               onFirstScan: _markAsScanned,
-              scanButtonKey: _scanButtonKey,
-              galleryButtonKey: _galleryButtonKey,
             ),
           );
-
-          // Туториал-оверлей
-          if (_showTutorial) {
-            return Stack(
-              children: [
-                mainContent,
-                _TutorialOverlay(
-                  scanButtonKey: _scanButtonKey,
-                  galleryButtonKey: _galleryButtonKey,
-                  onDismiss: _dismissTutorial,
-                ),
-              ],
-            );
-          }
-
-          return mainContent;
         },
       ),
     );
@@ -152,8 +126,31 @@ class _ScannerScreenState extends State<ScannerScreen> {
       await _processImage(context, controller, image.path);
     } catch (e) {
       if (mounted) {
-        _showErrorDialog(context, 'Ошибка загрузки: $e', () => _pickFromGallery(context));
+        _showErrorDialog(
+          context,
+          'Ошибка загрузки: $e',
+          () => _pickFromGallery(context),
+        );
       }
+    }
+  }
+
+  Future<void> _performTestScan(BuildContext context) async {
+    final ScannerController controller = context.read<ScannerController>();
+
+    final bool success = await controller.scanReceiptFromFile('');
+    if (!mounted) return;
+
+    if (success && controller.currentReceipt != null) {
+      await _markAsScanned();
+      await _saveToHistory(controller.currentReceipt!);
+      _navigateToResult(context, controller);
+    } else if (controller.errorMessage != null) {
+      _showErrorDialog(
+        context,
+        controller.errorMessage!,
+        () => _performTestScan(context),
+      );
     }
   }
 
@@ -162,39 +159,78 @@ class _ScannerScreenState extends State<ScannerScreen> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: const Text('Предпросмотр'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(imagePath, height: 300, fit: BoxFit.contain),
+                borderRadius: BorderRadius.circular(14),
+                child: Image.network(
+                  imagePath,
+                  height: 300,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return SizedBox(
+                      height: 300,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                              : null,
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               const Text('Использовать это фото для сканирования?'),
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Отмена')),
-            ElevatedButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Сканировать')),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Отмена'),
+            ),
+            ElevatedButton.icon(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              icon: const Icon(Icons.document_scanner, size: 18),
+              label: const Text('Сканировать'),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
           ],
         );
       },
     );
   }
 
-  Future<void> _processImage(BuildContext context, ScannerController controller, String imagePath) async {
-    final bool onlineSuccess = await controller.scanReceiptFromFile(imagePath);
+  Future<void> _processImage(
+    BuildContext context,
+    ScannerController controller,
+    String imagePath,
+  ) async {
+    final bool success = await controller.scanReceiptFromFile(imagePath);
     if (!mounted) return;
 
-    if (onlineSuccess && controller.currentReceipt != null) {
+    if (success && controller.currentReceipt != null) {
       await _markAsScanned();
       await _saveToHistory(controller.currentReceipt!);
       _navigateToResult(context, controller);
     } else if (controller.errorMessage != null) {
-      _showErrorDialog(context, controller.errorMessage!, () => _processImage(context, controller, imagePath));
-    } else if (!onlineSuccess && controller.dataSource != null) {
-      _showOfflineDialog(context, controller);
+      _showErrorDialog(
+        context,
+        controller.errorMessage!,
+        () => _processImage(context, controller, imagePath),
+      );
     }
   }
 
@@ -203,12 +239,21 @@ class _ScannerScreenState extends State<ScannerScreen> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: const Text('Ошибка сканирования'),
           content: Text(message),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Отмена')),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Отмена'),
+            ),
             ElevatedButton.icon(
-              onPressed: () { Navigator.pop(dialogContext); onRetry(); },
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                onRetry();
+              },
               icon: const Icon(Icons.refresh, size: 18),
               label: const Text('Повторить'),
             ),
@@ -223,165 +268,145 @@ class _ScannerScreenState extends State<ScannerScreen> {
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
-            ChangeNotifierProvider<ScannerController>.value(value: controller, child: const ResultScreen()),
+            ChangeNotifierProvider<ScannerController>.value(
+          value: controller,
+          child: const ResultScreen(),
+        ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return SlideTransition(
-            position: Tween<Offset>(begin: const Offset(1.0, 0.0), end: Offset.zero)
-                .animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut)),
+            position: Tween<Offset>(
+              begin: const Offset(1.0, 0.0),
+              end: Offset.zero,
+            ).animate(
+              CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeInOutCubic,
+              ),
+            ),
             child: child,
           );
         },
+        transitionDuration: const Duration(milliseconds: 400),
       ),
-    );
-  }
-
-  void _showOfflineDialog(BuildContext context, ScannerController controller) {
-    final String message = controller.dataSource == ScanDataSource.offlineTimeout
-        ? 'Сервер не отвечает (превышено время ожидания).'
-        : 'Нет подключения к интернету.';
-
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Text('Нет доступа к онлайн-базе'),
-          content: Text('$message\n\nИспользовать офлайн-данные?'),
-          actions: [
-            TextButton(onPressed: () { Navigator.pop(dialogContext); controller.reset(); }, child: const Text('Нет')),
-            ElevatedButton(
-              onPressed: () async {
-                Navigator.pop(dialogContext);
-                controller.useOfflineData();
-                if (controller.currentReceipt != null && context.mounted) {
-                  await _markAsScanned();
-                  await _saveToHistory(controller.currentReceipt!);
-                  _navigateToResult(context, controller);
-                }
-              },
-              child: const Text('Да, использовать офлайн'),
-            ),
-          ],
-        );
-      },
     );
   }
 
   void _showScanTips(BuildContext context) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Как сканировать'),
-          content: const Text(
-            '1. Положите чек на ровную поверхность\n2. Убедитесь, что текст хорошо освещен\n3. Держите камеру прямо над чеком\n4. Чек должен полностью помещаться в рамку\n5. Избегайте бликов и теней\n\nВы также можете загрузить фото чека из галереи.',
+        return ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[400],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Как сканировать чек',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 20),
+                  _buildTipRow(Icons.crop_free, 'Положите чек на ровную поверхность'),
+                  const SizedBox(height: 12),
+                  _buildTipRow(Icons.wb_sunny, 'Убедитесь, что текст хорошо освещен'),
+                  const SizedBox(height: 12),
+                  _buildTipRow(Icons.center_focus_strong, 'Держите камеру прямо над чеком'),
+                  const SizedBox(height: 12),
+                  _buildTipRow(Icons.fit_screen, 'Чек должен полностью помещаться в рамку'),
+                  const SizedBox(height: 12),
+                  _buildTipRow(Icons.highlight_off, 'Избегайте бликов и теней'),
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.lightbulb, color: Colors.amber[700], size: 20),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Вы также можете загрузить фото чека из галереи.',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey[700],
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Понятно'),
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-          actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Понятно'))],
         );
       },
     );
   }
-}
 
-// Виджет туториала
-class _TutorialOverlay extends StatelessWidget {
-  final GlobalKey scanButtonKey;
-  final GlobalKey galleryButtonKey;
-  final VoidCallback onDismiss;
-
-  const _TutorialOverlay({
-    required this.scanButtonKey,
-    required this.galleryButtonKey,
-    required this.onDismiss,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onDismiss,
-      child: Container(
-        color: Colors.black54,
-        child: Stack(
-          children: [
-            // Подсветка кнопки Галерея
-            _buildHighlight(
-              context: context,
-              targetKey: galleryButtonKey,
-              text: 'Загрузите фото чека\nиз галереи',
-              alignment: Alignment.bottomCenter,
-              offset: const Offset(0, -80),
-            ),
-            // Подсветка кнопки Сканировать
-            _buildHighlight(
-              context: context,
-              targetKey: scanButtonKey,
-              text: 'Или используйте\nтестовый скан',
-              alignment: Alignment.bottomCenter,
-              offset: const Offset(0, -80),
-            ),
-            // Кнопка закрыть
-            Positioned(
-              top: 60,
-              right: 20,
-              child: ElevatedButton(
-                onPressed: onDismiss,
-                child: const Text('Понятно'),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHighlight({
-    required BuildContext context,
-    required GlobalKey targetKey,
-    required String text,
-    required Alignment alignment,
-    required Offset offset,
-  }) {
-    final RenderBox? renderBox = targetKey.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox == null) return const SizedBox.shrink();
-
-    final Offset position = renderBox.localToGlobal(Offset.zero);
-    final Size size = renderBox.size;
-
-    return Stack(
+  Widget _buildTipRow(IconData icon, String text) {
+    return Row(
       children: [
-        // Подсвеченная область
-        Positioned(
-          left: position.dx - 4,
-          top: position.dy - 4,
-          width: size.width + 8,
-          height: size.height + 8,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              boxShadow: [BoxShadow(color: Colors.white.withOpacity(0.8), blurRadius: 12, spreadRadius: 2)],
-            ),
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(
+            icon,
+            color: Theme.of(context).colorScheme.primary,
+            size: 22,
           ),
         ),
-        // Текст подсказки
-        Positioned(
-          left: position.dx + size.width / 2 + offset.dx - 100,
-          top: position.dy + offset.dy,
-          child: Container(
-            width: 200,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8)],
-            ),
-            child: Column(
-              children: [
-                Text(text, textAlign: TextAlign.center, style: const TextStyle(fontSize: 14, color: Colors.black87)),
-                const SizedBox(height: 4),
-                Icon(Icons.arrow_downward, size: 20, color: Theme.of(context).colorScheme.primary),
-              ],
-            ),
-          ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Text(text, style: const TextStyle(fontSize: 15)),
         ),
       ],
     );
@@ -393,52 +418,122 @@ class _CameraPreview extends StatelessWidget {
   final bool showHint;
   final VoidCallback? onDismissHint;
 
-  const _CameraPreview({required this.controller, this.showHint = false, this.onDismissHint});
+  const _CameraPreview({
+    required this.controller,
+    this.showHint = false,
+    this.onDismissHint,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
         Container(
-          color: Colors.black,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.grey[900]!, Colors.grey[800]!],
+            ),
+          ),
           child: Center(
             child: controller.isProcessing
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const CircularProgressIndicator(color: Colors.white),
-                      const SizedBox(height: 16),
-                      Text('Анализируем чек...', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14)),
+                      const SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 3,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        'Анализируем чек...',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ],
                   )
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.document_scanner, size: 80, color: Colors.white.withOpacity(0.5)),
-                      const SizedBox(height: 16),
-                      Text('Наведите камеру на чек\nили выберите фото из галереи',
-                          textAlign: TextAlign.center, style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 16)),
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.receipt_long,
+                          size: 50,
+                          color: Colors.white.withOpacity(0.6),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'Нажмите «Сканировать» или «Галерея»\nдля загрузки фото',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.7),
+                          fontSize: 16,
+                          height: 1.5,
+                        ),
+                      ),
                     ],
                   ),
           ),
         ),
         if (showHint && !controller.isProcessing)
           Positioned(
-            bottom: 20, left: 20, right: 20,
+            bottom: 20,
+            left: 20,
+            right: 20,
             child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: Colors.white.withOpacity(0.9), borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.95),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 12,
+                  ),
+                ],
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Row(children: [
-                    Text('💡', style: TextStyle(fontSize: 20)), SizedBox(width: 8),
-                    Expanded(child: Text('Нажмите «Сканировать» или «Галерея» чтобы начать анализ продуктов',
-                        style: TextStyle(fontSize: 13, color: Colors.black87))),
-                  ]),
+                  Row(
+                    children: [
+                      const Text('💡', style: TextStyle(fontSize: 22)),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Нажмите «Сканировать» или «Галерея» чтобы начать анализ',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey[800],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 8),
-                  Align(alignment: Alignment.centerRight,
-                    child: TextButton(onPressed: onDismissHint, child: const Text('Больше не показывать', style: TextStyle(fontSize: 12)))),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: onDismissHint,
+                      child: const Text(
+                        'Больше не показывать',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -450,6 +545,7 @@ class _CameraPreview extends StatelessWidget {
 
 class _ScanInfoPanel extends StatelessWidget {
   final ScannerController controller;
+
   const _ScanInfoPanel({required this.controller});
 
   @override
@@ -457,55 +553,145 @@ class _ScanInfoPanel extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Активные диеты:', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          if (controller.activeDiets.isEmpty)
-            Text('Диеты не выбраны. Перейдите в настройки.', style: TextStyle(color: Colors.grey[600]))
-          else
-            Wrap(spacing: 8, runSpacing: 4,
-              children: controller.activeDiets.map((String diet) {
-                return Chip(label: Text(_dietDisplayName(diet)), backgroundColor: _dietColor(diet),
-                    labelStyle: const TextStyle(color: Colors.white, fontSize: 12));
-              }).toList()),
-          const Spacer(),
+          // Заголовок
+          Row(
+            children: [
+              Icon(
+                Icons.checklist,
+                size: 20,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Активные диеты:',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Центрированный контент
+          Expanded(
+            child: Center(
+              child: controller.activeDiets.isEmpty
+                  ? Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.orange[50],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            size: 18,
+                            color: Colors.orange[700],
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Диеты не выбраны. Перейдите в настройки.',
+                            style: TextStyle(
+                              color: Colors.orange[700],
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      alignment: WrapAlignment.center,
+                      children: controller.activeDiets.map((String diet) {
+                        final Color c = AppColors.getDietColor(diet);
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: c.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: c.withOpacity(0.3)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                AppColors.getDietIcon(diet),
+                                size: 16,
+                                color: c,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                AppColors.getDietName(diet),
+                                style: TextStyle(
+                                  color: c,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+            ),
+          ),
+
+          // Ошибка внизу
           if (controller.errorMessage != null)
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: Colors.red[50], borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.red[200]!)),
-              child: Row(children: [
-                Icon(Icons.error_outline, color: Colors.red[700]), const SizedBox(width: 8),
-                Expanded(child: Text(controller.errorMessage!, style: TextStyle(color: Colors.red[700], fontSize: 13))),
-              ]),
+              decoration: BoxDecoration(
+                color: Colors.red[50],
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.red[200]!),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    color: Colors.red[700],
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      controller.errorMessage!,
+                      style: TextStyle(
+                        color: Colors.red[700],
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
         ],
       ),
     );
   }
-
-  String _dietDisplayName(String dietKey) {
-    const Map<String, String> names = {'no_sugar': 'Без сахара', 'keto': 'Кето', 'low_fodmap': 'Low-FODMAP', 'lactose_free': 'Без лактозы'};
-    return names[dietKey] ?? dietKey;
-  }
-
-  Color _dietColor(String dietKey) {
-    const Map<String, Color> colors = {'no_sugar': Color(0xFF42A5F5), 'keto': Color(0xFFFF7043), 'low_fodmap': Color(0xFFAB47BC), 'lactose_free': Color(0xFF26A69A)};
-    return colors[dietKey] ?? Colors.grey;
-  }
 }
 
-class _BottomScanButton extends StatelessWidget {
+class _BottomScanButtons extends StatelessWidget {
   final ScannerController controller;
   final VoidCallback onPickFromGallery;
+  final VoidCallback onTestScan;
   final Future<void> Function(Receipt) onSaveToHistory;
   final VoidCallback onFirstScan;
-  final GlobalKey scanButtonKey;
-  final GlobalKey galleryButtonKey;
 
-  const _BottomScanButton({
-    required this.controller, required this.onPickFromGallery, required this.onSaveToHistory,
-    required this.onFirstScan, required this.scanButtonKey, required this.galleryButtonKey,
+  const _BottomScanButtons({
+    required this.controller,
+    required this.onPickFromGallery,
+    required this.onTestScan,
+    required this.onSaveToHistory,
+    required this.onFirstScan,
   });
 
   @override
@@ -517,32 +703,54 @@ class _BottomScanButton extends StatelessWidget {
           children: [
             Expanded(
               child: ElevatedButton.icon(
-                key: galleryButtonKey,
                 onPressed: controller.isProcessing ? null : onPickFromGallery,
                 icon: controller.isProcessing
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
                     : const Icon(Icons.photo_library),
                 label: const Text('Галерея', style: TextStyle(fontSize: 14)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                  foregroundColor: Theme.of(context).colorScheme.onSecondary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  backgroundColor:
+                      Theme.of(context).colorScheme.secondary,
+                  foregroundColor:
+                      Theme.of(context).colorScheme.onSecondary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: ElevatedButton.icon(
-                key: scanButtonKey,
-                onPressed: controller.isProcessing ? null : () => _onScanPressed(context),
+                onPressed: controller.isProcessing ? null : onTestScan,
                 icon: controller.isProcessing
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : const Icon(Icons.camera_alt),
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.document_scanner),
                 label: const Text('Сканировать', style: TextStyle(fontSize: 14)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  backgroundColor:
+                      Theme.of(context).colorScheme.primary,
+                  foregroundColor:
+                      Theme.of(context).colorScheme.onPrimary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
             ),
@@ -550,73 +758,5 @@ class _BottomScanButton extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  void _onScanPressed(BuildContext context) async {
-    final ScannerController controller = context.read<ScannerController>();
-    final bool onlineSuccess = await controller.scanReceiptFromFile('');
-    if (!context.mounted) return;
-
-    if (onlineSuccess && controller.currentReceipt != null) {
-      onFirstScan();
-      await onSaveToHistory(controller.currentReceipt!);
-      Navigator.push(context, PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            ChangeNotifierProvider<ScannerController>.value(value: controller, child: const ResultScreen()),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return SlideTransition(
-            position: Tween<Offset>(begin: const Offset(1.0, 0.0), end: Offset.zero)
-                .animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut)),
-            child: child,
-          );
-        },
-      ));
-    } else if (controller.errorMessage != null) {
-      _showErrorDialog(context, controller.errorMessage!, () => _onScanPressed(context));
-    } else if (!onlineSuccess && controller.dataSource != null) {
-      final String message = controller.dataSource == ScanDataSource.offlineTimeout
-          ? 'Сервер не отвечает (превышено время ожидания).' : 'Нет подключения к интернету.';
-      showDialog(context: context, builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Text('Нет доступа к онлайн-базе'),
-          content: Text('$message\n\nИспользовать офлайн-данные?'),
-          actions: [
-            TextButton(onPressed: () { Navigator.pop(dialogContext); controller.reset(); }, child: const Text('Нет')),
-            ElevatedButton(onPressed: () async {
-              Navigator.pop(dialogContext);
-              controller.useOfflineData();
-              if (controller.currentReceipt != null && context.mounted) {
-                await onSaveToHistory(controller.currentReceipt!);
-                Navigator.push(context, PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) =>
-                      ChangeNotifierProvider<ScannerController>.value(value: controller, child: const ResultScreen()),
-                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                    return SlideTransition(
-                      position: Tween<Offset>(begin: const Offset(1.0, 0.0), end: Offset.zero)
-                          .animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut)),
-                      child: child,
-                    );
-                  },
-                ));
-              }
-            }, child: const Text('Да, использовать офлайн')),
-          ],
-        );
-      });
-    }
-  }
-
-  void _showErrorDialog(BuildContext context, String message, VoidCallback onRetry) {
-    showDialog(context: context, builder: (BuildContext dialogContext) {
-      return AlertDialog(
-        title: const Text('Ошибка сканирования'), content: Text(message),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Отмена')),
-          ElevatedButton.icon(
-            onPressed: () { Navigator.pop(dialogContext); onRetry(); },
-            icon: const Icon(Icons.refresh, size: 18), label: const Text('Повторить')),
-        ],
-      );
-    });
   }
 }

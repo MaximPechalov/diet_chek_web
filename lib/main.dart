@@ -18,31 +18,31 @@ void main() async {
     DeviceOrientation.portraitUp,
   ]);
 
-  // Показываем splash screen
-  runApp(const SplashScreen());
+  final List<Future<void>> initTasks = [
+    LocalDatabase.initialize(),
+    IngredientAnalyzer.initialize(),
+    ScanReceiptUseCase.loadBrands(),
+  ];
 
-  // Загружаем все данные в фоне
-  try {
-    await LocalDatabase.initialize();
-  } catch (e) {
-    print('Ошибка загрузки базы продуктов: $e');
+  // Показываем splash пока загружаются данные
+  runApp(const _SplashApp());
+
+  // Загружаем данные в фоне
+  for (final task in initTasks) {
+    try {
+      await task;
+    } catch (e) {
+      // продолжаем при ошибке
+    }
   }
 
-  try {
-    await IngredientAnalyzer.initialize();
-  } catch (e) {
-    print('Ошибка загрузки словаря ингредиентов: $e');
-  }
-
-  await ScanReceiptUseCase.loadBrands();
-
+  // Запускаем основное приложение
   final ProductRepository productRepository = ProductRepository();
   final ScanReceiptUseCase scanReceiptUseCase = ScanReceiptUseCase(productRepository);
   final OcrService ocrService = OcrService();
 
   final bool onboardingComplete = await _isOnboardingComplete();
 
-  // Заменяем splash на основное приложение
   runApp(
     MultiProvider(
       providers: [
@@ -82,64 +82,119 @@ Future<bool> _isOnboardingComplete() async {
   }
 }
 
-// Splash Screen
-class SplashScreen extends StatelessWidget {
-  const SplashScreen({super.key});
+class _SplashApp extends StatefulWidget {
+  const _SplashApp();
+
+  @override
+  State<_SplashApp> createState() => _SplashAppState();
+}
+
+class _SplashAppState extends State<_SplashApp> with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _pulseAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Определяем тему системы
     final bool isDark = WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark;
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFF2E7D32),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.grey[800] : Colors.white,
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                child: Icon(
-                  Icons.receipt_long,
-                  size: 60,
-                  color: isDark ? Colors.white : const Color(0xFF2E7D32),
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isDark
+                  ? [const Color(0xFF1a1a1a), const Color(0xFF0d2d0d), const Color(0xFF1a1a1a)]
+                  : [const Color(0xFF2E7D32), const Color(0xFF388E3C), const Color(0xFF4CAF50)],
+            ),
+          ),
+          child: SafeArea(
+            child: Center(
+              child: AnimatedBuilder(
+                animation: _pulseAnimation,
+                builder: (context, child) {
+                  return Transform.scale(scale: _pulseAnimation.value, child: child);
+                },
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.95),
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 25,
+                            offset: const Offset(0, 12),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(Icons.receipt_long, size: 70, color: Color(0xFF2E7D32)),
+                    ),
+                    const SizedBox(height: 36),
+                    Text(
+                      'Dietio',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 42,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 4,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 15,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Персональный диетический аудитор',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.85),
+                        fontSize: 15,
+                        letterSpacing: 1.2,
+                        fontWeight: FontWeight.w300,
+                      ),
+                    ),
+                    const SizedBox(height: 60),
+                    const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 24),
-              Text(
-                'Dietio',
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.white,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 2,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Персональный диетический аудитор',
-                style: TextStyle(
-                  color: isDark ? Colors.white70 : Colors.white70,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 48),
-              SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  color: isDark ? Colors.white : Colors.white,
-                  strokeWidth: 2,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

@@ -39,12 +39,34 @@ class ScannerController extends ChangeNotifier {
     _loadActiveDiets();
   }
 
+  // Геттеры
   bool get isProcessing => _isProcessing;
   String? get errorMessage => _errorMessage;
   Receipt? get currentReceipt => _currentReceipt;
   List<String> get activeDiets => _activeDiets;
   OnlineProduct? get onlineResult => _onlineResult;
   ScanDataSource? get dataSource => _dataSource;
+
+  // Публичные сеттеры для ручного ввода
+  set isProcessing(bool value) {
+    _isProcessing = value;
+    notifyListeners();
+  }
+
+  set errorMessage(String? value) {
+    _errorMessage = value;
+    notifyListeners();
+  }
+
+  set currentReceipt(Receipt? value) {
+    _currentReceipt = value;
+    notifyListeners();
+  }
+
+  set dataSource(ScanDataSource? value) {
+    _dataSource = value;
+    notifyListeners();
+  }
 
   Future<void> _loadActiveDiets() async {
     try {
