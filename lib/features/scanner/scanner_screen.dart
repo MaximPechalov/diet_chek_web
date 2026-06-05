@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../domain/usecases/scan_receipt.dart';
 import '../../services/ocr_service.dart';
 import '../../data/models/receipt.dart';
@@ -89,8 +91,8 @@ class _ScannerScreenState extends State<ScannerScreen> {
             ),
             bottomNavigationBar: _BottomScanButtons(
               controller: controller,
+              onTakePhoto: () => _takePhoto(context),
               onPickFromGallery: () => _pickFromGallery(context),
-              onTestScan: () => _performTestScan(context),
               onSaveToHistory: _saveToHistory,
               onFirstScan: _markAsScanned,
             ),
@@ -107,6 +109,47 @@ class _ScannerScreenState extends State<ScannerScreen> {
       savedReceipts.insert(0, jsonEncode(receipt.toJson()));
       await prefs.setStringList('receipts', savedReceipts);
     } catch (e) {}
+  }
+
+  Future<void> _takePhoto(BuildContext context) async {
+    // Запрашиваем разрешение камеры
+    final PermissionStatus status = await Permission.camera.request();
+
+    if (status.isGranted) {
+      try {
+        final XFile? photo = await _imagePicker.pickImage(
+          source: ImageSource.camera,
+          imageQuality: 90,
+        );
+
+        if (photo == null) return;
+
+        final ScannerController controller = context.read<ScannerController>();
+        await _processImage(context, controller, photo.path);
+      } catch (e) {
+        if (mounted) {
+          _showErrorDialog(
+            context,
+            'Ошибка камеры: $e',
+            () => _takePhoto(context),
+          );
+        }
+      }
+    } else if (status.isPermanentlyDenied) {
+      if (mounted) {
+        _showPermissionDialog(context);
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Разрешение камеры необходимо для сканирования'),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _pickFromGallery(BuildContext context) async {
@@ -135,25 +178,6 @@ class _ScannerScreenState extends State<ScannerScreen> {
     }
   }
 
-  Future<void> _performTestScan(BuildContext context) async {
-    final ScannerController controller = context.read<ScannerController>();
-
-    final bool success = await controller.scanReceiptFromFile('');
-    if (!mounted) return;
-
-    if (success && controller.currentReceipt != null) {
-      await _markAsScanned();
-      await _saveToHistory(controller.currentReceipt!);
-      _navigateToResult(context, controller);
-    } else if (controller.errorMessage != null) {
-      _showErrorDialog(
-        context,
-        controller.errorMessage!,
-        () => _performTestScan(context),
-      );
-    }
-  }
-
   Future<bool?> _showPhotoPreview(BuildContext context, String imagePath) async {
     return showDialog<bool>(
       context: context,
@@ -168,24 +192,10 @@ class _ScannerScreenState extends State<ScannerScreen> {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(14),
-                child: Image.network(
-                  imagePath,
+                child: Image.file(
+                  File(imagePath),
                   height: 300,
                   fit: BoxFit.contain,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return SizedBox(
-                      height: 300,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                              : null,
-                        ),
-                      ),
-                    );
-                  },
                 ),
               ),
               const SizedBox(height: 16),
@@ -232,6 +242,37 @@ class _ScannerScreenState extends State<ScannerScreen> {
         () => _processImage(context, controller, imagePath),
       );
     }
+  }
+
+  void _showPermissionDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Text('Доступ к камере'),
+          content: const Text(
+            'Для сканирования чеков необходим доступ к камере. '
+            'Пожалуйста, разрешите доступ в настройках приложения.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Отмена'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                openAppSettings();
+              },
+              child: const Text('Открыть настройки'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showErrorDialog(BuildContext context, String message, VoidCallback onRetry) {
@@ -454,6 +495,7 @@ class _CameraPreview extends StatelessWidget {
                           color: Colors.white.withOpacity(0.8),
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
+                          letterSpacing: 0.3,
                         ),
                       ),
                     ],
@@ -476,12 +518,13 @@ class _CameraPreview extends StatelessWidget {
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        'Нажмите «Сканировать» или «Галерея»\nдля загрузки фото',
+                        'Сфотографируйте чек\nили выберите фото из галереи',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.7),
                           fontSize: 16,
                           height: 1.5,
+                          letterSpacing: 0.2,
                         ),
                       ),
                     ],
@@ -554,7 +597,6 @@ class _ScanInfoPanel extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          // Заголовок
           Row(
             children: [
               Icon(
@@ -573,8 +615,6 @@ class _ScanInfoPanel extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-
-          // Центрированный контент
           Expanded(
             child: Center(
               child: controller.activeDiets.isEmpty
@@ -643,8 +683,6 @@ class _ScanInfoPanel extends StatelessWidget {
                     ),
             ),
           ),
-
-          // Ошибка внизу
           if (controller.errorMessage != null)
             Container(
               padding: const EdgeInsets.all(12),
@@ -681,15 +719,15 @@ class _ScanInfoPanel extends StatelessWidget {
 
 class _BottomScanButtons extends StatelessWidget {
   final ScannerController controller;
+  final VoidCallback onTakePhoto;
   final VoidCallback onPickFromGallery;
-  final VoidCallback onTestScan;
   final Future<void> Function(Receipt) onSaveToHistory;
   final VoidCallback onFirstScan;
 
   const _BottomScanButtons({
     required this.controller,
+    required this.onTakePhoto,
     required this.onPickFromGallery,
-    required this.onTestScan,
     required this.onSaveToHistory,
     required this.onFirstScan,
   });
@@ -714,7 +752,10 @@ class _BottomScanButtons extends StatelessWidget {
                         ),
                       )
                     : const Icon(Icons.photo_library),
-                label: const Text('Галерея', style: TextStyle(fontSize: 14)),
+                label: const Text(
+                  'Галерея',
+                  style: TextStyle(fontSize: 14, letterSpacing: 0.3),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
                       Theme.of(context).colorScheme.secondary,
@@ -730,7 +771,7 @@ class _BottomScanButtons extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: controller.isProcessing ? null : onTestScan,
+                onPressed: controller.isProcessing ? null : onTakePhoto,
                 icon: controller.isProcessing
                     ? const SizedBox(
                         width: 20,
@@ -740,8 +781,11 @@ class _BottomScanButtons extends StatelessWidget {
                           color: Colors.white,
                         ),
                       )
-                    : const Icon(Icons.document_scanner),
-                label: const Text('Сканировать', style: TextStyle(fontSize: 14)),
+                    : const Icon(Icons.camera_alt),
+                label: const Text(
+                  'Сканировать',
+                  style: TextStyle(fontSize: 14, letterSpacing: 0.3),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
                       Theme.of(context).colorScheme.primary,

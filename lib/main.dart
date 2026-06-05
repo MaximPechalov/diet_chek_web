@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'app.dart';
 import 'features/onboarding/onboarding_screen.dart';
@@ -18,6 +19,10 @@ void main() async {
     DeviceOrientation.portraitUp,
   ]);
 
+  // Запрашиваем разрешение камеры
+  await _requestCameraPermission();
+
+  // Загрузка данных
   final List<Future<void>> initTasks = [
     LocalDatabase.initialize(),
     IngredientAnalyzer.initialize(),
@@ -71,6 +76,14 @@ void main() async {
             ),
     ),
   );
+}
+
+Future<void> _requestCameraPermission() async {
+  final PermissionStatus status = await Permission.camera.request();
+  if (status.isDenied || status.isPermanentlyDenied) {
+    // Можно показать диалог с объяснением, но пока просто логируем
+    print('Разрешение камеры не получено: $status');
+  }
 }
 
 Future<bool> _isOnboardingComplete() async {

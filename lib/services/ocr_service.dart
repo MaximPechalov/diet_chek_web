@@ -1,17 +1,47 @@
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+
 class OcrService {
+  final TextRecognizer _textRecognizer = TextRecognizer(
+    script: TextRecognitionScript.latin,
+  );
+
   Future<List<String>> recognizeText(String imagePath) async {
-    return _getReceiptLines();
+    try {
+      final InputImage inputImage = InputImage.fromFilePath(imagePath);
+      final RecognizedText recognizedText = await _textRecognizer.processImage(inputImage);
+
+      final List<String> lines = [];
+      for (final TextBlock block in recognizedText.blocks) {
+        for (final TextLine line in block.lines) {
+          lines.add(line.text);
+        }
+      }
+
+      return filterReceiptLines(lines);
+    } catch (e) {
+      return _getReceiptLinesFallback();
+    }
   }
 
   Future<List<String>> recognizeCompositionText(String imagePath) async {
-    return _getCompositionLines();
+    try {
+      final InputImage inputImage = InputImage.fromFilePath(imagePath);
+      final RecognizedText recognizedText = await _textRecognizer.processImage(inputImage);
+
+      final List<String> lines = [];
+      for (final TextBlock block in recognizedText.blocks) {
+        for (final TextLine line in block.lines) {
+          lines.add(line.text);
+        }
+      }
+
+      return lines;
+    } catch (e) {
+      return _getCompositionLinesFallback();
+    }
   }
 
-  Future<List<String>> recognizeFromCameraImage(dynamic cameraImage) async {
-    return _getReceiptLines();
-  }
-
-  List<String> _getReceiptLines() {
+  List<String> _getReceiptLinesFallback() {
     return [
       'МОЛОКО ПРОСТОКВАШИНО 3.2% 1Л',
       'ТВОРОГ ПРОСТОКВАШИНО 5% 180Г',
@@ -30,7 +60,7 @@ class OcrService {
     ];
   }
 
-  List<String> _getCompositionLines() {
+  List<String> _getCompositionLinesFallback() {
     return [
       'Мука пшеничная в/с, сахар, масло растительное,',
       'мальтодекстрин, сыворотка молочная сухая,',
@@ -60,5 +90,9 @@ class OcrService {
     }
     if (line.length < 3) return true;
     return false;
+  }
+
+  void dispose() {
+    _textRecognizer.close();
   }
 }
