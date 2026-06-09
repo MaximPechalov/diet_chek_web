@@ -54,7 +54,9 @@ class DietioAppState extends State<DietioApp> {
   }
 
   void setThemeMode(ThemeMode mode) => setState(() => _themeMode = mode);
+
   void setAccentColorFromHue(double hue) => setState(() => _accentHue = hue);
+
   void setBackgroundColor(double hue, double saturation, double lightness) {
     setState(() {
       _backgroundHue = hue;
@@ -76,9 +78,20 @@ class DietioAppState extends State<DietioApp> {
     ).toColor();
   }
 
+  Color _textColorForBackground(Color background) {
+    final double luminance = (0.299 * background.red +
+            0.587 * background.green +
+            0.114 * background.blue) /
+        255;
+    return luminance > 0.6 ? Colors.black87 : Colors.white;
+  }
+
   @override
   Widget build(BuildContext context) {
     final Color accent = _accentColor;
+    final Color bgColor = _backgroundColor;
+    final Color textColor = _textColorForBackground(bgColor);
+
     return MaterialApp(
       title: 'Dietio',
       debugShowCheckedModeBanner: false,
@@ -89,16 +102,20 @@ class DietioAppState extends State<DietioApp> {
           seedColor: accent,
           brightness: Brightness.light,
         ),
-        appBarTheme: const AppBarTheme(
+        appBarTheme: AppBarTheme(
           centerTitle: true,
           elevation: 0,
+          backgroundColor: bgColor,
+          foregroundColor: textColor,
           titleTextStyle: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.5,
+            color: textColor,
           ),
+          iconTheme: IconThemeData(color: textColor),
         ),
-        scaffoldBackgroundColor: _backgroundColor,
+        scaffoldBackgroundColor: bgColor,
       ),
       darkTheme: ThemeData(
         useMaterial3: true,
@@ -109,11 +126,15 @@ class DietioAppState extends State<DietioApp> {
         appBarTheme: const AppBarTheme(
           centerTitle: true,
           elevation: 0,
+          backgroundColor: Color(0xFF121212),
+          foregroundColor: Colors.white,
           titleTextStyle: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.5,
+            color: Colors.white,
           ),
+          iconTheme: IconThemeData(color: Colors.white),
         ),
       ),
       home: const MainNavigationScreen(),
@@ -130,7 +151,7 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
-  final PageController _pageController = PageController();
+  late final PageController _pageController;
 
   final List<Widget> _screens = const [
     ScannerScreen(),
@@ -141,9 +162,22 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // Начинаем с большого числа, чтобы можно было крутить бесконечно
+    _pageController = PageController(initialPage: _currentIndex);
+  }
+
+  @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  int _normalizeIndex(int index) {
+    // Приводим любой индекс к диапазону 0..4
+    final int normalized = index % _screens.length;
+    return normalized < 0 ? normalized + _screens.length : normalized;
   }
 
   @override
@@ -153,13 +187,35 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         MediaQuery.of(context).size.width / _screens.length;
 
     return Scaffold(
-      body: PageView(
-        controller: _pageController,
-        physics: const BouncingScrollPhysics(),
-        onPageChanged: (index) {
-          setState(() => _currentIndex = index);
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          if (notification is ScrollEndNotification) {
+            final PageMetrics metrics = notification.metrics as PageMetrics;
+            // Округляем до ближайшей страницы
+            final int page = metrics.page?.round() ?? 0;
+            final int normalized = _normalizeIndex(page);
+
+            if (normalized != _currentIndex) {
+              setState(() {
+                _currentIndex = normalized;
+              });
+            }
+          }
+          return false;
         },
-        children: _screens,
+        child: PageView(
+          controller: _pageController,
+          // Разрешаем скролл без ограничений
+          onPageChanged: (int page) {
+            final int normalized = _normalizeIndex(page);
+            if (normalized != _currentIndex) {
+              setState(() {
+                _currentIndex = normalized;
+              });
+            }
+          },
+          children: _screens,
+        ),
       ),
       bottomNavigationBar: Container(
         height: 70,
@@ -175,7 +231,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         ),
         child: Stack(
           children: [
-            // Анимированный индикатор
             AnimatedPositioned(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOutCubic,
@@ -190,44 +245,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 ),
               ),
             ),
-            // Табы
             Row(
               children: [
-                _buildTab(
-                  index: 0,
-                  icon: Icons.receipt_long_outlined,
-                  activeIcon: Icons.receipt_long,
-                  label: 'Чек',
-                  primaryColor: primaryColor,
-                ),
-                _buildTab(
-                  index: 1,
-                  icon: Icons.menu_book_outlined,
-                  activeIcon: Icons.menu_book,
-                  label: 'Состав',
-                  primaryColor: primaryColor,
-                ),
-                _buildTab(
-                  index: 2,
-                  icon: Icons.history_outlined,
-                  activeIcon: Icons.history,
-                  label: 'История',
-                  primaryColor: primaryColor,
-                ),
-                _buildTab(
-                  index: 3,
-                  icon: Icons.bar_chart_outlined,
-                  activeIcon: Icons.bar_chart,
-                  label: 'Статистика',
-                  primaryColor: primaryColor,
-                ),
-                _buildTab(
-                  index: 4,
-                  icon: Icons.settings_outlined,
-                  activeIcon: Icons.settings,
-                  label: 'Настройки',
-                  primaryColor: primaryColor,
-                ),
+                _buildTab(0, Icons.receipt_long_outlined, Icons.receipt_long, 'Чек', primaryColor),
+                _buildTab(1, Icons.menu_book_outlined, Icons.menu_book, 'Состав', primaryColor),
+                _buildTab(2, Icons.history_outlined, Icons.history, 'История', primaryColor),
+                _buildTab(3, Icons.bar_chart_outlined, Icons.bar_chart, 'Статистика', primaryColor),
+                _buildTab(4, Icons.settings_outlined, Icons.settings, 'Настройки', primaryColor),
               ],
             ),
           ],
@@ -240,13 +264,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     return _currentIndex * tabWidth + (tabWidth - 28) / 2;
   }
 
-  Widget _buildTab({
-    required int index,
-    required IconData icon,
-    required IconData activeIcon,
-    required String label,
-    required Color primaryColor,
-  }) {
+  Widget _buildTab(
+    int index,
+    IconData icon,
+    IconData activeIcon,
+    String label,
+    Color primaryColor,
+  ) {
     final bool isActive = _currentIndex == index;
 
     return Expanded(
@@ -254,8 +278,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         onTap: () {
           if (index != _currentIndex) {
             setState(() => _currentIndex = index);
+
+            // Анимируем переход с учётом направления
+            final int currentPage = _pageController.page?.round() ?? 0;
+            final int targetPage = currentPage +
+                (index > _currentIndex || (_currentIndex == _screens.length - 1 && index == 0)
+                    ? 1
+                    : -1);
+
             _pageController.animateToPage(
-              index,
+              targetPage,
               duration: const Duration(milliseconds: 350),
               curve: Curves.easeInOutCubic,
             );
@@ -269,10 +301,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
               transitionBuilder: (child, animation) {
-                return ScaleTransition(
-                  scale: animation,
-                  child: child,
-                );
+                return ScaleTransition(scale: animation, child: child);
               },
               child: Icon(
                 isActive ? activeIcon : icon,

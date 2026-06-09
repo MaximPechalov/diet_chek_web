@@ -19,9 +19,6 @@ void main() async {
     DeviceOrientation.portraitUp,
   ]);
 
-  // Запрашиваем разрешение камеры
-  await _requestCameraPermission();
-
   // Загрузка данных
   final List<Future<void>> initTasks = [
     LocalDatabase.initialize(),
@@ -56,7 +53,7 @@ void main() async {
         Provider<OcrService>.value(value: ocrService),
       ],
       child: onboardingComplete
-          ? DietioApp()
+          ? _PermissionGate(child: DietioApp())
           : MaterialApp(
               debugShowCheckedModeBanner: false,
               home: OnboardingScreen(
@@ -68,7 +65,7 @@ void main() async {
                         Provider<ScanReceiptUseCase>.value(value: scanReceiptUseCase),
                         Provider<OcrService>.value(value: ocrService),
                       ],
-                      child: DietioApp(),
+                      child: _PermissionGate(child: DietioApp()),
                     ),
                   );
                 },
@@ -78,20 +75,114 @@ void main() async {
   );
 }
 
-Future<void> _requestCameraPermission() async {
-  final PermissionStatus status = await Permission.camera.request();
-  if (status.isDenied || status.isPermanentlyDenied) {
-    // Можно показать диалог с объяснением, но пока просто логируем
-    print('Разрешение камеры не получено: $status');
-  }
-}
-
 Future<bool> _isOnboardingComplete() async {
   try {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getBool('onboarding_complete') ?? false;
   } catch (e) {
     return false;
+  }
+}
+
+/// Запрашивает разрешение камеры при первом запуске
+class _PermissionGate extends StatefulWidget {
+  final Widget child;
+  _PermissionGate({required this.child});
+
+  @override
+  State<_PermissionGate> createState() => _PermissionGateState();
+}
+
+class _PermissionGateState extends State<_PermissionGate> {
+  bool _permissionChecked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkPermissions();
+  }
+
+  Future<void> _checkPermissions() async {
+    // Проверяем, не запрашивали ли уже разрешение
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final bool permissionAsked = prefs.getBool('camera_permission_asked') ?? false;
+
+    if (!permissionAsked) {
+      // Ждём кадр, чтобы диалог показался поверх интерфейса
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      if (mounted) {
+        final bool? granted = await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: Row(
+              children: [
+                Container(
+                  width: 44, height: 44,
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.camera_alt, color: Colors.blue, size: 24),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(child: Text('Доступ к камере', style: TextStyle(fontSize: 18, letterSpacing: 0.3))),
+              ],
+            ),
+            content: const Text(
+              'Для сканирования чеков и составов продуктов приложению нужен доступ к камере.\n\n'
+              'Вы сможете изменить это в любое время в настройках телефона.',
+              style: TextStyle(fontSize: 14, letterSpacing: 0.2),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Не сейчас', style: TextStyle(letterSpacing: 0.3)),
+              ),
+              ElevatedButton.icon(
+                onPressed: () => Navigator.pop(context, true),
+                icon: const Icon(Icons.check, size: 18),
+                label: const Text('Разрешить', style: TextStyle(letterSpacing: 0.3)),
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ],
+          ),
+        );
+
+        if (granted == true) {
+          final PermissionStatus status = await Permission.camera.request();
+          if (status.isDenied || status.isPermanentlyDenied) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Разрешение камеры отклонено'),
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  action: SnackBarAction(
+                    label: 'Настройки',
+                    onPressed: () => openAppSettings(),
+                  ),
+                ),
+              );
+            }
+          }
+        }
+
+        // Запоминаем, что спрашивали
+        await prefs.setBool('camera_permission_asked', true);
+      }
+    }
+
+    setState(() => _permissionChecked = true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
   }
 }
 
@@ -153,57 +244,20 @@ class _SplashAppState extends State<_SplashApp> with SingleTickerProviderStateMi
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      width: 120,
-                      height: 120,
+                      width: 120, height: 120,
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.95),
                         borderRadius: BorderRadius.circular(30),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
-                            blurRadius: 25,
-                            offset: const Offset(0, 12),
-                          ),
-                        ],
+                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 25, offset: const Offset(0, 12))],
                       ),
                       child: const Icon(Icons.receipt_long, size: 70, color: Color(0xFF2E7D32)),
                     ),
                     const SizedBox(height: 36),
-                    Text(
-                      'Dietio',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 42,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 4,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black.withOpacity(0.3),
-                            blurRadius: 15,
-                            offset: const Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                    ),
+                    Text('Dietio', style: TextStyle(color: Colors.white, fontSize: 42, fontWeight: FontWeight.bold, letterSpacing: 4, shadows: [Shadow(color: Colors.black.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 5))])),
                     const SizedBox(height: 10),
-                    Text(
-                      'Персональный диетический аудитор',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.85),
-                        fontSize: 15,
-                        letterSpacing: 1.2,
-                        fontWeight: FontWeight.w300,
-                      ),
-                    ),
+                    Text('Персональный диетический аудитор', style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 15, letterSpacing: 1.2, fontWeight: FontWeight.w300)),
                     const SizedBox(height: 60),
-                    const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    ),
+                    const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)),
                   ],
                 ),
               ),
